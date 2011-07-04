@@ -41,15 +41,21 @@ XXX
     Implement optional unsuppressed ENDCOMMA
     (line no.108)
     
-- RunTimeError: maximum recursion depth         [ ]
+- RunTimeError: maximum recursion depth         [x]
     exceeded when doing simple if
     test (or any I think)
+
+    __Resolution__
+    atom wasn't implemented properly
+    (line no. 162)
+
+- file_input isn't matching anything            [ ]
 '''
 #------------------------------------------------#
 # E L E M E N T S
 #------------------------------------------------#
 #Basics
-NAME = Word(alphas).setParseAction(actions.exceptReservedWords)
+NAME = Word(alphas)#.setParseAction(actions.exceptReservedWords)
 NUM = Word(nums)
 STRING = Or( dblQuotedString, sglQuotedString )
 NEWLINE = LineEnd()
@@ -133,6 +139,7 @@ RPAREN = Suppress(")")
 LBRACK = Suppress("[")
 RBRACK = Suppress("]")
 COLON = Suppress(":")
+TICK = Suppress('`')
 SEMICOLON = Suppress(';')
 DOT = Suppress('.')
 COMMENT = Suppress(pythonStyleComment)
@@ -153,8 +160,10 @@ test = Forward()
 testlist_comp = Forward()
 testlist = delimitedList(test) + ENDCOMMA
 testlist1 = delimitedList(test)
-atom = testlist_comp ^ testlist1 ^ NAME ^ NUM ^ OneOrMore(STRING)
-		   
+#atom = testlist_comp ^ testlist1 ^ NAME ^ NUM ^ OneOrMore(STRING)
+atom = (LPAREN + testlist_comp + RPAREN) \
+       ^ TICK + testlist1 + TICK \
+       ^ (NAME | NUM | OneOrMore(STRING))
 #Expr node is a building block of many grammars
 #[depends on #Argument Lists] => *Forwards trailer
 factor = Forward()
