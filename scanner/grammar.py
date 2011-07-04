@@ -14,11 +14,22 @@ NOTES
     http://packages.python.org/pyparsing --> pyparsing.Forward)
 TODO
 - Finish grammar with base as file_input 	[x]
-- Organize into categories / sections 		[ ]
-- Name them into groups 					[ ]
-- Hook up parse actions 					[ ]
-'''
+- Organize into categories / sections 		[x]
+- Name them into groups 			[ ]
+- Hook up parse actions 			[ ]
 
+XXX
+- Using suppress on comma results in unknown    [x]
+    single-element tuple declarations
+    ( e.g. `('a',)` )(line no.107)
+    
+    __Resolution__
+    Implement optional unsuppressed ENDCOMMA
+    (line no.108)
+'''
+#------------------------------------------------#
+# E L E M E N T S
+#------------------------------------------------#
 #Basics
 NAME = Word(alphas + "_")
 NUM = Word(nums)
@@ -97,9 +108,7 @@ bitwiseXor = Literal('^')
 complement = Literal('~')
 
 #Literals (Suppress showing up in results table)
-#XXX Using suppress on comma results in not being able to tell single-element tuple ( e.g. `('a',)` )
 COMMA = Suppress(',')
-#YYY Implement unsuppressed ENDCOMMA
 ENDCOMMA = Optional(',')
 LPAREN = Suppress("(")
 RPAREN = Suppress(")")
@@ -112,30 +121,26 @@ COMMENT = Suppress(pythonStyleComment)
 KERNELDEC = Suppress('@kernel')
 
 #------------------------------------------------#
-# Elements
+# C O R E | G R A M M A R
 #------------------------------------------------#
-#The simplest elements that don't need forwarding
-comp_op = greater|lesser|greaterOrEqual|lesserOrEqual|equal|notequal|_is|_in|_not \
-          | _not + _in | _is + _not
-augassign = plusAssign | minusAssign | multAssign | divAssign | modAssign \
-		| bitwiseAndAssign | bitwiseOrAssign | bitwiseComplementAssign \
-		| shiftLeftAssign | shiftRightAssign | powerAssign | floorDivAssign
-pass_stmt = _pass
-break_stmt = _break
-continue_stmt = _continue
-decorator_kernel = KERNELDEC + Optional(LPAREN + arglist + RPAREN) + NEWLINE
+#Imports
+dotted_name = delimitedList(NAME, delim='.')
+dotted_as_name = dotted_name + Optional(_as + NAME)
+import_name = _import + (dotted_as_name | dotted_name)
+import_stmt = import_name
 
-#Test node is a building block for many elements
+#Test & atom node are two building blocks of many grammars
+#[depends on #Comparison nodes] => *Forwards test
 test = Forward()
 testlist_comp = Forward()
-atom = testlist_comp | testlist1 | NAME | NUMBER | OneOrMore(STRING)
 testlist = delimitedList(test) + ENDCOMMA
 testlist1 = delimitedList(test)
-subscript = (test | test + COLON + test)
-subscriptlist = subscript + ZeroOrMore(COMMA + subscript) + ENDCOMMA
+atom = testlist_comp | testlist1 | NAME | NUM | OneOrMore(STRING)
 		   
-#Defining factor will allow us to define expr -- another useful building block
+#Expr node is a building block of many grammars
+#[depends on #Argument Lists] => *Forwards trailer
 factor = Forward()
+trailer = Forward()
 power = atom + ZeroOrMore(trailer) + Optional('**' + factor)
 factor << (plus | minus | complement) + (factor | power)
 term = factor + ZeroOrMore((mult | div | mod | divFloor) + factor)
@@ -146,7 +151,9 @@ xor_expr = and_expr + ZeroOrMore(complement + and_expr)
 expr = xor_expr + ZeroOrMore(bitwiseOr + xor_expr)
 exprlist = delimitedList(expr) + ENDCOMMA
 
-#Comparison elements
+#Comparison nodes
+comp_op = greater|lesser|greaterOrEqual|lesserOrEqual|equal|notequal|_is|_in|_not \
+          | _not + _in | _is + _not
 comparison = expr + ZeroOrMore(comp_op + expr)
 not_test = Forward()
 not_test << ((_not +  not_test) | comparison)
@@ -159,32 +166,15 @@ comp_if = _if + test + Optional(comp_iter)
 comp_iter << (comp_for | comp_if)
 testlist_comp << (test + (comp_for | ZeroOrMore(COMMA + test) + ENDCOMMA))
 
-#Statements
-stmt = Forward()
-flow_stmt = break_stmt | continue_stmt | return_stmt
-return_stmt = _return + Optional(testlist)
-del_stmt = _delete + exprlist
-print_stmt = _print + Optional(delimitedList(test) + ENDCOMMA)
-dotted_name = delimitedList(NAME, delim='.')
-dotted_as_name = dotted_name + Optional(_as + NAME)
-import_name = _import + (dotted_as_name | dotted_name)
-import_stmt = import_name
-expr_stmt = testlist + ZeroOrMore((augassign + testlist) | (assign + testlist))
-global_stmt = _global + delimitedList(NAME)
-assert_stmt = _assert + delimitedList(test)
-small_stmt = (expr_stmt | print_stmt | del_stmt | pass_stmt | flow_stmt \
-		| import_stmt | global_stmt | assert_stmt)
-simple_stmt = delimitedList(small_stmt, delim=';') + Optional(SEMICOLON) + NEWLINE
+#List declarations [depends on #Test Node & #Expr Node]
+list_iter = Forward()
+list_if = _if + test + Optional(list_iter)
+list_for = _for + exprlist + _in + testlist + Optional(list_iter)
+list_iter << (list_for | list_if)
+subscript = (test | test + COLON + test)
+subscriptlist = subscript + ZeroOrMore(COMMA + subscript) + ENDCOMMA
 
-suite = simple_stmt | (NEWLINE + INDENT + OneOrMore(stmt) + DEDENT)
-for_stmt = _for + exprlist + _in + testlist + COLON + suite \
-		+ Optional(_else + COLON + suite)
-while_stmt = _while + test + COLON + suite + Optional(_else + COLON + suite)
-if_stmt = _if + test + COLON + suite + ZeroOrMore(_elif + test + COLON + suite) \
-		+ Optional(_else + COLON + suite)
-return_stmt = _return + Optional(testlist)
-flow_stmt = break_stmt | continue_stmt | return_stmt
-
+#Argument Lists [depends on #List declarations]
 fpdef = Forward()
 fplist = delimitedList(fpdef) + ENDCOMMA
 fpdef << (NAME | (LPAREN + fplist + RPAREN))
@@ -192,25 +182,61 @@ varargslist = ZeroOrMore(fpdef + Optional(assign + test) + COMMA) \
 		+ (mult + NAME + ( Optional(COMMA + power + NAME)) 
 		| fpdef + Optional(assign + test)
 		+ ZeroOrMore(COMMA + fpdef + Optional(assign + test) + ENDCOMMA))
+
+argument = test + Optional(comp_for) | test + assign + test
+arglist = ZeroOrMore(argument + COMMA) \
+          + (argument + Optional(COMMA)| mult + test + ZeroOrMore(COMMA + argument)
+           + Optional(COMMA + power + test)
+           | power + test)
+
+trailer << ( LPAREN + Optional(arglist) + RPAREN
+          | LBRACK + subscriptlist + RBRACK
+          | DOT + NAME)
 lambdef = _lambda + Optional(varargslist) + COLON + test
 parameters = LPAREN + varargslist + RPAREN
+
+
+#Block statements [depends on #Top Level Statements] => *Forwards simple_stmt & stmt
+simple_stmt = Forward()
+stmt = Forward()
+suite = simple_stmt | (NEWLINE + INDENT + OneOrMore(stmt) + DEDENT)
+if_stmt = _if + test + COLON + suite + ZeroOrMore(_elif + test + COLON + suite) \
+		+ Optional(_else + COLON + suite)
+for_stmt = _for + exprlist + _in + testlist + COLON + suite \
+		+ Optional(_else + COLON + suite)
+while_stmt = _while + test + COLON + suite + Optional(_else + COLON + suite)
 funcdef = _def + NAME + parameters + COLON + suite
+return_stmt = _return + Optional(testlist)
 
-#Argument List
-argument = test + Optional(comp_for) | test + assign + test
-arglist = ZeroOrMore(argument + COMMA) + (argument + Optional(COMMA) \ 
-		| mult + test + ZeroOrMore(COMMA + argument) + Optional(COMMA + power + test)
-		| power + test
-trailer = LPAREN + Optional(arglist) + RPAREN \ 
-		| LBRACK + subscriptlist + RBRACK
-		| DOT + NAME
-list_iter = Forward()
-list_if = _if + test + Optional(list_iter)
-list_for = _for + exprlist + _in + testlist + Optional(list_iter)
-list_iter << (list_for | list_if)
+#Block flow control statments
+pass_stmt = _pass
+break_stmt = _break
+continue_stmt = _continue
+flow_stmt = break_stmt | continue_stmt | return_stmt
 
+#Class Declarations [depends on #Block Statements]
 classdef = _class + NAME + Optional(LPAREN + testlist + RPAREN) + COLON + suite
-decorated = decorator + (classdef | funcdef)
+decorator_kernel = KERNELDEC + Optional(LPAREN + arglist + RPAREN) + NEWLINE
+decorated = decorator_kernel + (classdef | funcdef)
+
+#Other Statements
+augassign = plusAssign | minusAssign | multAssign | divAssign | modAssign \
+		| bitwiseAndAssign | bitwiseOrAssign | bitwiseComplementAssign \
+		| shiftLeftAssign | shiftRightAssign | powerAssign | floorDivAssign
+global_stmt = _global + delimitedList(NAME)
+assert_stmt = _assert + delimitedList(test)
+del_stmt = _delete + exprlist
+print_stmt = _print + Optional(delimitedList(test) + ENDCOMMA)
+
+#Top level statements
+expr_stmt = testlist + ZeroOrMore((augassign + testlist) | (assign + testlist))
+small_stmt = (expr_stmt | print_stmt | del_stmt | pass_stmt | flow_stmt \
+		| import_stmt | global_stmt | assert_stmt)
+simple_stmt << (delimitedList(small_stmt, delim=';') + Optional(SEMICOLON) + NEWLINE)
 compound_stmt = if_stmt | while_stmt | for_stmt | funcdef | classdef | decorated
-stmt = simple_stmt | compound_stmt
-file_input = ZeroOrMore(NEWLINE | stmt) ENDMARKER
+stmt << (simple_stmt | compound_stmt)
+
+#Top of our parser
+file_input = ZeroOrMore(NEWLINE | stmt) #ENDMARKER.. not sure if it's needed
+
+print file_input
