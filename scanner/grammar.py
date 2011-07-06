@@ -1,23 +1,11 @@
 from pyparsing import *
 import actions
 
-###SAFE###
-########## Uses ^ instead of | for OR expressions:
-
-'''
-One issue to be aware of is that '|' is an eager matcher, not a greedy one;
-that is, it will match the first successful match, and not evaluate all options
-and choose the longest one. In a construct such as this:
-OneOrMore(libraryDef | useDef | architectureDef | entityDef | 
-          packageBodyDef | packageDef | configurationDeclarationDef)
-you must be careful that an early expression might mask a later one in the list.
-To work around this, replace the '|'s with '^'s - you'll take a hit in parsing speed
-but this may help you identify some subtle issues in your grammar.
-'''
 '''
 -----
-GUP.grammar
-This module will be imported into scanner.py
+GUP.scanner.grammar
+This module will be imported into scanner.py and holds our CFG grammar
+(heavily influenced by Python)
 -----
 NOTES
 - Keyword('if') will NOT match ("ifsomething") but WILL match ("[if] something")
@@ -29,8 +17,8 @@ NOTES
 TODO
 - Finish grammar with base as file_input 	[x]
 - Organize into categories / sections 		[x]
-- Name them into groups 			[ ]
-- Hook up parse actions 			[ ]
+- Name them into groups 					[ ]
+- Hook up parse actions 					[ ]
 
 XXX
 - Using suppress on comma results in unknown    [x]
@@ -51,17 +39,34 @@ XXX
 
 - file_input isn't matching anything            [ ]
 '''
+
+### SAFE (and slow)
+### Uses ^ instead of | for OR expressions:
+'''
+One issue to be aware of is that '|' is an eager matcher, not a greedy one;
+that is, it will match the first successful match, and not evaluate all options
+and choose the longest one. In a construct such as this:
+OneOrMore(libraryDef | useDef | architectureDef | entityDef | 
+          packageBodyDef | packageDef | configurationDeclarationDef)
+you must be careful that an early expression might mask a later one in the list.
+To work around this, replace the '|'s with '^'s - you'll take a hit in parsing speed
+but this may help you identify some subtle issues in your grammar.
+'''
+
+ParserElement.setDefaultWhitespaceChars(" \n")
 #------------------------------------------------#
 # E L E M E N T S
 #------------------------------------------------#
 #Basics
-NAME = Word(alphas)#.setParseAction(actions.exceptReservedWords)
-NUM = Word(nums)
-STRING = Or( dblQuotedString, sglQuotedString )
-NEWLINE = LineEnd()
+NAME = Word(alphas).setResultsName("NAME")
+NUM = Word(nums).setResultsName("NUM")
+STRING = (dblQuotedString ^ sglQuotedString).setResultsName("STRING")
+NEWLINE = StringEnd()
 #TODO: INDENT + DEDENT need parse actions to validate indentation
-INDENT = LineStart() + (OneOrMore (White('\t').parseWithTabs() ))
-DEDENT = LineStart() + (ZeroOrMore (White('\t').parseWithTabs() ))
+TAB = White('\t', exact=1)
+INDENT = ((StringStart() + (OneOrMore(TAB))).parseWithTabs()).setResultsName("INDENT")
+#XXX Removing Dedent.. need to set parse action instead. Only here as filler for suite
+DEDENT = Forward()
 
 #Comparisons
 greater = Literal('>')
@@ -226,6 +231,8 @@ parameters = LPAREN + varargslist + RPAREN
 #Block statements [depends on #Top Level Statements] => *Forwards simple_stmt & stmt
 simple_stmt = Forward()
 stmt = Forward()
+#XXX Need to remove DEDENT as it matches INDENT just the same..
+#XXX Need to place a action statement to verify the ending DEDENT
 suite = simple_stmt ^ (NEWLINE + INDENT + OneOrMore(stmt) + DEDENT)
 if_stmt = _if + test + COLON + suite + ZeroOrMore(_elif + test + COLON + suite) \
 		+ Optional(_else + COLON + suite)
@@ -264,4 +271,4 @@ compound_stmt = if_stmt ^ while_stmt ^ for_stmt ^ funcdef ^ classdef ^ decorated
 stmt << (simple_stmt ^ compound_stmt)
 
 #Top of our parser
-file_input = ZeroOrMore(NEWLINE ^ stmt)
+file_input = (ZeroOrMore(NEWLINE ^ stmt)).parseWithTabs()
