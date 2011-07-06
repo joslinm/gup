@@ -56,7 +56,8 @@ def trailer():
 	print tokens.dump()
 	print '[x==5]'
 	tokens = grammar.trailer.parseString('[x == 5]')
-	print tokens.dump()
+	print tokens.asXML()
+	
 def power():
 	print "Running tests on [power]"
 	#power = (atom + ZeroOrMore(trailer) + Optional('**' + factor)).setResultsName("power")
@@ -66,14 +67,22 @@ def power():
 def factor():
 	print "Running tests on [factor]"
 	#factor << ( ((plus ^ minus ^ complement) + factor) ^ power).setResultsName("factor")
+	
 	tokens = grammar.factor.parseString("42").dump()
 	print tokens
 
 	tokens = grammar.factor.parseString("+ 5").dump()
 	print tokens
-	
 
+def expr():
+	print "Running tests on [expr]"
+	#expr = (xor_expr + ZeroOrMore(bitwiseOr + xor_expr))('expr')
+	
+	print 'x * 5'
+	tokens = grammar.expr.parseString("x * 5")
+	print tokens.dump()
 #basics()
 #factor()
 #power()
-trailer()
+#trailer()
+expr()

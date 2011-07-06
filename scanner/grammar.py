@@ -71,205 +71,209 @@ DOT = Suppress('.')
 COMMENT = Suppress(pythonStyleComment)
 
 #Basics
-NAME = Word(alphas).setResultsName("NAME")
-NUM = (Word(nums) + Optional(DOT + Word(nums))).setResultsName("NUM")
-STRING = (dblQuotedString ^ sglQuotedString).setResultsName("STRING")
+NAME = Word(alphas)("NAME")
+NUM = (Word(nums) + Optional(DOT + Word(nums)))("NUM")
+STRING = (dblQuotedString ^ sglQuotedString)("STRING")
 NEWLINE = Suppress(StringEnd())
 #TODO: INDENT + DEDENT need parse actions to validate indentation
 TAB = White('\t', exact=1)
-INDENT = ((StringStart() + (OneOrMore(TAB))).parseWithTabs()).setResultsName("INDENT")
+INDENT = ((StringStart() + (OneOrMore(TAB))).parseWithTabs())("INDENT")
 #XXX Removing Dedent.. need to set parse action instead. Only here as filler for suite
 DEDENT = Forward()
 
 #Comparisons
-greater = Literal('>').setResultsName('greater')
-lesser = Literal('<').setResultsName('lesser')
-greaterOrEqual = Literal('>=').setResultsName('greaterOrEqual')
-lesserOrEqual = Literal('<=').setResultsName('lesserOrEqual')
-equal = Literal('==').setResultsName('equal')
-notequal = Literal('!=').setResultsName('notequal')
+greater = Literal('>')('greater')
+lesser = Literal('<')('lesser')
+greaterOrEqual = Literal('>=')('greaterOrEqual')
+lesserOrEqual = Literal('<=')('lesserOrEqual')
+equal = Literal('==')('equal')
+notequal = Literal('!=')('notequal')
 
-_in = Keyword('in').setResultsName('in')
-_not = Keyword('not').setResultsName('not')
-_is = Keyword('is').setResultsName('is')
-_and = Keyword('and').setResultsName('and')
-_or = Keyword('or').setResultsName('or')
+_in = Keyword('in')('in')
+_not = Keyword('not')('not')
+_is = Keyword('is')('is')
+_and = Keyword('and')('and')
+_or = Keyword('or')('or')
 
 #Flow Control
-_while = Keyword('while').setResultsName('while')
-_if = Keyword('if').setResultsName('if')
-_else = Keyword('else').setResultsName('else')
-_elif = Keyword('elif').setResultsName('elif')
-_for = Keyword('for').setResultsName('for')
-_continue = Keyword('continue').setResultsName('continue')
-_pass = Keyword('pass')
-_break = Keyword('break')
+_while = Keyword('while')('while')
+_if = Keyword('if')('if')
+_else = Keyword('else')('else')
+_elif = Keyword('elif')('elif')
+_for = Keyword('for')('for')
+_continue = Keyword('continue')('continue')
+_pass = Keyword('pass')('pass')
+_break = Keyword('break')('break')
 
 #Utility Keywords
-KERNELDEC = Keyword('@kernel')
-_def = Keyword('def')
-_class = Keyword('class')
-_lambda = Keyword('lambda')
-_delete = Keyword('del')
-_print = Keyword('print')
-_global = Keyword('global')
-_import = Keyword('import')
-_as = Keyword('as')
-_assert = Keyword('assert')
-_return = Keyword('return')
+KERNELDEC = Keyword('@kernel')("KERNELDEC")
+_def = Keyword('def')('def')
+_class = Keyword('class')('class')
+_lambda = Keyword('lambda')('lambda')
+_delete = Keyword('del')('delete')
+_print = Keyword('print')('print')
+_global = Keyword('global')('global')
+_import = Keyword('import')('import')
+_as = Keyword('as')('as')
+_assert = Keyword('assert')('assert')
+_return = Keyword('return')('return')
 
 #Assignments
-assign = Literal('=')
-plusAssign = Literal("+=")
-minusAssign = Literal("-=")
-multAssign = Literal("*=")
-divAssign = Literal("/=")
-modAssign = Literal("%=")
-bitwiseAndAssign = Literal("&=")
-bitwiseOrAssign = Literal("|=")
-bitwiseComplementAssign = Literal("^=")
-shiftLeftAssign = Literal("<<=")
-shiftRightAssign = Literal(">>=")
-powerAssign = Literal("**=")
-floorDivAssign = Literal("//=")
+assign = Literal('=')('assign')
+plusAssign = Literal("+=")('plusAssign')
+minusAssign = Literal("-=")('minusAssign')
+multAssign = Literal("*=")('multAssign')
+divAssign = Literal("/=")('divAssign')
+modAssign = Literal("%=")('modAssign')
+bitwiseAndAssign = Literal("&=")('bitwiseAndAssign')
+bitwiseOrAssign = Literal("|=")('bitwiseOrAssign')
+bitwiseComplementAssign = Literal("^=")('bitwiseComplementAssign')
+shiftLeftAssign = Literal("<<=")('shiftLeftAssign')
+shiftRightAssign = Literal(">>=")('shiftRightAssign')
+powerAssign = Literal("**=")('powerAssign')
+floorDivAssign = Literal("//=")('floorDivAssign')
 
 #Math Operations
-mult = Literal('*').setResultsName('mult')
-power = Literal('**').setResultsName('power')
-div = Literal('/').setResultsName('div')
-divFloor = Literal('//').setResultsName('divFloor')
-mod = Literal('%').setResultsName('mod')
-plus = Literal('+').setResultsName('plus')
-minus = Literal('-').setResultsName('minus')
+mult = Literal('*')('mult')
+power = Literal('**')('power')
+div = Literal('/')('div')
+divFloor = Literal('//')('divFloor')
+mod = Literal('%')('mod')
+plus = Literal('+')('plus')
+minus = Literal('-')('minus')
 
 #Bitwise Operations
-shiftLeft = Literal('<<')
-shiftRight = Literal('>>')
-bitwiseAnd = Literal('&')
-bitwiseOr = Literal('|')
-bitwiseXor = Literal('^')
-complement = Literal('~')
+shiftLeft = Literal('<<')('shiftLeft')
+shiftRight = Literal('>>')('shiftRight')
+bitwiseAnd = Literal('&')('bitwiseAnd')
+bitwiseOr = Literal('|')('bitwiseOr')
+bitwiseXor = Literal('^')('bitwiseXor')
+complement = Literal('~')('complement')
 
 
 #------------------------------------------------#
 # C O R E | G R A M M A R
 #------------------------------------------------#
 #Imports
-dotted_name = delimitedList(NAME, delim='.')
-dotted_as_name = dotted_name + Optional(_as + NAME)
-import_name = _import + (dotted_as_name ^ dotted_name)
-import_stmt = import_name
+dotted_name = delimitedList(NAME, delim='.')('dotted_name')
+dotted_as_name = dotted_name + Optional(_as + NAME)('dotted_as_name')
+import_name = _import + (dotted_as_name ^ dotted_name)('import_name')
+import_stmt = import_name('import_stmt')
 
 #Test & atom node are two building blocks of many grammars
 #[depends on #Comparison nodes] => *Forwards test
-test = Forward()
-testlist_comp = Forward()
-testlist = delimitedList(test) + ENDCOMMA
-testlist1 = delimitedList(test)
-#atom = testlist_comp ^ testlist1 ^ NAME ^ NUM ^ OneOrMore(STRING)
+test = Forward()('test')
+testlist_comp = Forward()('testlist_comp')
+testlist = (delimitedList(test) + ENDCOMMA)('testlist')
+testlist1 = (delimitedList(test)('testlist1'))
 atom = ((LPAREN + testlist_comp + RPAREN) \
        ^ (TICK + testlist1 + TICK) \
-       ^ (NAME | NUM | OneOrMore(STRING))).setResultsName('atom')
+       ^ (NAME | NUM | OneOrMore(STRING)))('atom')
+	   
 #Expr node is a building block of many grammars
 #[depends on #Argument Lists] => *Forwards trailer
-factor = Forward()
-trailer = Forward()
-power = (atom + ZeroOrMore(trailer) + Optional('**' + factor)).setResultsName("power")
-factor << (((plus ^ minus ^ complement) + factor) ^ power).setResultsName("factor")
-term = factor + ZeroOrMore((mult ^ div ^ mod ^ divFloor) + factor)
-arith_expr = term + ZeroOrMore((plus ^ minus) + term)
-shift_expr = arith_expr + ZeroOrMore((shiftLeft ^ shiftRight) + arith_expr)
-and_expr = shift_expr + ZeroOrMore(bitwiseAnd + shift_expr)
-xor_expr = and_expr + ZeroOrMore(complement + and_expr)
-expr = xor_expr + ZeroOrMore(bitwiseOr + xor_expr)
-exprlist = delimitedList(expr) + ENDCOMMA
+factor = Forward()('factor')
+trailer = Forward()('trailer')
+power = (atom + ZeroOrMore(trailer) + Optional('**' + factor))("power")
+factor << (((plus ^ minus ^ complement) + factor) ^ power)
+term = (factor + ZeroOrMore((mult ^ div ^ mod ^ divFloor) + factor))('term')
+arith_expr = (term + ZeroOrMore((plus ^ minus) + term))('arith_expr')
+shift_expr = (arith_expr + ZeroOrMore((shiftLeft ^ shiftRight) + arith_expr)) \
+	('shift_expr')
+and_expr = (shift_expr + ZeroOrMore(bitwiseAnd + shift_expr))('and_expr')
+xor_expr = (and_expr + ZeroOrMore(complement + and_expr))('xor_expr')
+expr = (xor_expr + ZeroOrMore(bitwiseOr + xor_expr))('expr')
+exprlist = (delimitedList(expr) + ENDCOMMA)('exprlist')
 
 #Comparison nodes
-comp_op = greater^lesser^greaterOrEqual^lesserOrEqual^equal^notequal^_is^_in^_not \
-          ^ _not + _in ^ _is + _not
-comparison = expr + ZeroOrMore(comp_op + expr)
-not_test = Forward()
+comp_op = (greater^lesser^greaterOrEqual^lesserOrEqual^equal^notequal^_is^_in^_not \
+          ^ _not + _in ^ _is + _not)('comp_op')
+comparison = (expr + ZeroOrMore(comp_op + expr))('comparison')
+not_test = Forward()('not_test')
 not_test << ((_not +  not_test) ^ comparison)
-and_test = not_test + ZeroOrMore(_and + not_test)
-or_test = and_test + ZeroOrMore(_or + and_test)
+and_test = (not_test + ZeroOrMore(_and + not_test))('and_test')
+or_test = (and_test + ZeroOrMore(_or + and_test))('or_test')
 test << (or_test + Optional(_if + or_test + _else + test))
-comp_iter = Forward()
-comp_for = _for + exprlist + _in + or_test + Optional(comp_iter)
-comp_if = _if + test + Optional(comp_iter)
+comp_iter = Forward()('comp_iter')
+comp_for = (_for + exprlist + _in + or_test + Optional(comp_iter))('comp_for')
+comp_if = (_if + test + Optional(comp_iter))('comp_if')
 comp_iter << (comp_for ^ comp_if)
 testlist_comp << (test + (comp_for ^ ZeroOrMore(COMMA + test) + ENDCOMMA))
 
 #List declarations [depends on #Test Node & #Expr Node]
-list_iter = Forward()
-list_if = _if + test + Optional(list_iter)
-list_for = _for + exprlist + _in + testlist + Optional(list_iter)
+list_iter = Forward()('list_iter')
+list_if = (_if + test + Optional(list_iter))('list_if')
+list_for = (_for + exprlist + _in + testlist + Optional(list_iter))('list_for')
 list_iter << (list_for ^ list_if)
-subscript = (test ^ (test + COLON + test))
-subscriptlist = delimitedList(subscript) + ENDCOMMA
+subscript = (test ^ (test + COLON + test))('subscript')
+subscriptlist = (delimitedList(subscript) + ENDCOMMA)('subscriptlist')
 
 #Argument Lists [depends on #List declarations]
-fpdef = Forward()
-fplist = delimitedList(fpdef) + ENDCOMMA
+fpdef = Forward()('fpdef')
+fplist = (delimitedList(fpdef) + ENDCOMMA)('fplist')
 fpdef << (NAME ^ (LPAREN + fplist + RPAREN))
-varargslist = ZeroOrMore(fpdef + Optional(assign + test) + COMMA) \
+varargslist = (ZeroOrMore(fpdef + Optional(assign + test) + COMMA) \
 		+ (mult + NAME + ( Optional(COMMA + power + NAME)) 
 		^ fpdef + Optional(assign + test)
-		+ ZeroOrMore(COMMA + fpdef + Optional(assign + test) + ENDCOMMA))
+		+ ZeroOrMore(COMMA + fpdef + Optional(assign + test) + ENDCOMMA))) \
+		('varargslist')
 
-argument = test + Optional(comp_for) ^ test + assign + test
-arglist = ZeroOrMore(argument + COMMA) \
+argument = (test + Optional(comp_for) ^ test + assign + test)('argument')
+arglist = (ZeroOrMore(argument + COMMA) \
           + (argument + Optional(COMMA)^ mult + test + ZeroOrMore(COMMA + argument)
            + Optional(COMMA + power + test)
-           ^ power + test)
+           ^ power + test))('arglist')
 
 trailer << ( (LPAREN + Optional(arglist) + RPAREN) \
           ^ (LBRACK + subscriptlist + RBRACK) \
-          ^ (DOT + NAME)).setResultsName('trailer')
-lambdef = _lambda + Optional(varargslist) + COLON + test
-parameters = LPAREN + varargslist + RPAREN
+          ^ (DOT + NAME))('trailer')
+lambdef = (_lambda + Optional(varargslist) + COLON + test)('lambdef')
+parameters = (LPAREN + varargslist + RPAREN)('parameters')
 
 
 #Block statements [depends on #Top Level Statements] => *Forwards simple_stmt & stmt
-simple_stmt = Forward()
-stmt = Forward()
+simple_stmt = Forward()('simple_stmt')
+stmt = Forward()('stmt')
 #XXX Need to remove DEDENT as it matches INDENT just the same..
 #XXX Need to place a action statement to verify the ending DEDENT
-suite = simple_stmt ^ (NEWLINE + INDENT + OneOrMore(stmt) + DEDENT)
-if_stmt = _if + test + COLON + suite + ZeroOrMore(_elif + test + COLON + suite) \
-		+ Optional(_else + COLON + suite)
-for_stmt = _for + exprlist + _in + testlist + COLON + suite \
-		+ Optional(_else + COLON + suite)
-while_stmt = _while + test + COLON + suite + Optional(_else + COLON + suite)
-funcdef = _def + NAME + parameters + COLON + suite
-return_stmt = _return + Optional(testlist)
+suite = (simple_stmt ^ (NEWLINE + INDENT + OneOrMore(stmt) + DEDENT))('suite')
+if_stmt = (_if + test + COLON + suite + ZeroOrMore(_elif + test + COLON + suite) \
+		+ Optional(_else + COLON + suite))('if_stmt')
+for_stmt = (_for + exprlist + _in + testlist + COLON + suite \
+		+ Optional(_else + COLON + suite))('for_stmt')
+while_stmt = (_while + test + COLON + suite + Optional(_else + COLON + suite))('while')
+funcdef = (_def + NAME + parameters + COLON + suite)('funcdef')
+return_stmt = (_return + Optional(testlist))('return_stmt')
 
 #Block flow control statments
-pass_stmt = _pass
-break_stmt = _break
-continue_stmt = _continue
-flow_stmt = break_stmt ^ continue_stmt ^ return_stmt
+pass_stmt = _pass('pass_stmt')
+break_stmt = _break('break_stmt')
+continue_stmt = _continue('continue_stmt')
+flow_stmt = (break_stmt ^ continue_stmt ^ return_stmt) ('flow_stmt')
 
 #Class Declarations [depends on #Block Statements]
-classdef = _class + NAME + Optional(LPAREN + testlist + RPAREN) + COLON + suite
-decorator_kernel = KERNELDEC + Optional(LPAREN + arglist + RPAREN) + NEWLINE
-decorated = decorator_kernel + (classdef ^ funcdef)
+classdef = (_class + NAME + Optional(LPAREN + testlist + RPAREN) + COLON + suite)('classdef')
+decorator_kernel = (KERNELDEC + Optional(LPAREN + arglist + RPAREN) + NEWLINE)('decorator_kernel')
+decorated = (decorator_kernel + (classdef ^ funcdef))('decorated')
 
 #Other Statements
-augassign = plusAssign ^ minusAssign ^ multAssign ^ divAssign ^ modAssign \
+augassign = (plusAssign ^ minusAssign ^ multAssign ^ divAssign ^ modAssign \
 		^ bitwiseAndAssign ^ bitwiseOrAssign ^ bitwiseComplementAssign \
-		^ shiftLeftAssign ^ shiftRightAssign ^ powerAssign ^ floorDivAssign
-global_stmt = _global + delimitedList(NAME)
-assert_stmt = _assert + delimitedList(test)
-del_stmt = _delete + exprlist
-print_stmt = _print + Optional(delimitedList(test) + ENDCOMMA)
+		^ shiftLeftAssign ^ shiftRightAssign ^ powerAssign ^ floorDivAssign) \
+		.setResultsName('augassign')
+global_stmt = (_global + delimitedList(NAME))('global_stmt')
+assert_stmt = (_assert + delimitedList(test))('assert_stmt')
+del_stmt = (_delete + exprlist)('del_stmt')
+print_stmt = (_print + Optional(delimitedList(test) + ENDCOMMA))('print_stmt')
 
 #Top level statements
-expr_stmt = testlist + ZeroOrMore((augassign + testlist) ^ (assign + testlist))
+expr_stmt = (testlist + ZeroOrMore((augassign + testlist) ^ (assign + testlist)))('expr_stmt')
 small_stmt = (expr_stmt ^ print_stmt ^ del_stmt ^ pass_stmt ^ flow_stmt \
-		^ import_stmt ^ global_stmt ^ assert_stmt)
+		^ import_stmt ^ global_stmt ^ assert_stmt)('small_stmt')
 simple_stmt << (delimitedList(small_stmt, delim=';') + Optional(SEMICOLON) + NEWLINE)
-compound_stmt = if_stmt ^ while_stmt ^ for_stmt ^ funcdef ^ classdef ^ decorated
+compound_stmt = (if_stmt ^ while_stmt ^ for_stmt ^ funcdef ^ classdef ^ decorated) \
+	('compound_stmt')
 stmt << (simple_stmt ^ compound_stmt)
 
 #Top of our parser
-file_input = (ZeroOrMore(NEWLINE ^ stmt)).parseWithTabs()
+file_input = (ZeroOrMore(stmt + NEWLINE))('file_input')
