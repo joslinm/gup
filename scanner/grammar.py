@@ -57,11 +57,24 @@ ParserElement.setDefaultWhitespaceChars(" \n")
 #------------------------------------------------#
 # E L E M E N T S
 #------------------------------------------------#
+#Literals (Suppress showing up in results table)
+COMMA = Suppress(',')
+ENDCOMMA = Optional(',')
+LPAREN = Suppress("(")
+RPAREN = Suppress(")")
+LBRACK = Suppress("[")
+RBRACK = Suppress("]")
+COLON = Suppress(":")
+TICK = Suppress('`')
+SEMICOLON = Suppress(';')
+DOT = Suppress('.')
+COMMENT = Suppress(pythonStyleComment)
+
 #Basics
 NAME = Word(alphas).setResultsName("NAME")
-NUM = Word(nums).setResultsName("NUM")
+NUM = (Word(nums) + Optional(DOT + Word(nums))).setResultsName("NUM")
 STRING = (dblQuotedString ^ sglQuotedString).setResultsName("STRING")
-NEWLINE = StringEnd()
+NEWLINE = Suppress(StringEnd())
 #TODO: INDENT + DEDENT need parse actions to validate indentation
 TAB = White('\t', exact=1)
 INDENT = ((StringStart() + (OneOrMore(TAB))).parseWithTabs()).setResultsName("INDENT")
@@ -69,30 +82,31 @@ INDENT = ((StringStart() + (OneOrMore(TAB))).parseWithTabs()).setResultsName("IN
 DEDENT = Forward()
 
 #Comparisons
-greater = Literal('>')
-lesser = Literal('<')
-greaterOrEqual = Literal('>=')
-lesserOrEqual = Literal('<=')
-equal = Literal('==')
-notequal = Literal('!=')
+greater = Literal('>').setResultsName('greater')
+lesser = Literal('<').setResultsName('lesser')
+greaterOrEqual = Literal('>=').setResultsName('greaterOrEqual')
+lesserOrEqual = Literal('<=').setResultsName('lesserOrEqual')
+equal = Literal('==').setResultsName('equal')
+notequal = Literal('!=').setResultsName('notequal')
 
-_in = Keyword('in')
-_not = Keyword('not')
-_is = Keyword('is')
-_and = Keyword('and')
-_or = Keyword('or')
+_in = Keyword('in').setResultsName('in')
+_not = Keyword('not').setResultsName('not')
+_is = Keyword('is').setResultsName('is')
+_and = Keyword('and').setResultsName('and')
+_or = Keyword('or').setResultsName('or')
 
 #Flow Control
-_while = Keyword('while')
-_if = Keyword('if')
-_else = Keyword('else')
-_elif = Keyword('elif')
-_for = Keyword('for')
-_continue = Keyword('continue')
+_while = Keyword('while').setResultsName('while')
+_if = Keyword('if').setResultsName('if')
+_else = Keyword('else').setResultsName('else')
+_elif = Keyword('elif').setResultsName('elif')
+_for = Keyword('for').setResultsName('for')
+_continue = Keyword('continue').setResultsName('continue')
 _pass = Keyword('pass')
 _break = Keyword('break')
 
 #Utility Keywords
+KERNELDEC = Keyword('@kernel')
 _def = Keyword('def')
 _class = Keyword('class')
 _lambda = Keyword('lambda')
@@ -120,13 +134,13 @@ powerAssign = Literal("**=")
 floorDivAssign = Literal("//=")
 
 #Math Operations
-mult = Literal('*')
-power = Literal('**')
-div = Literal('/')
-divFloor = Literal('//')
-mod = Literal('%')
-plus = Literal('+')
-minus = Literal('-')
+mult = Literal('*').setResultsName('mult')
+power = Literal('**').setResultsName('power')
+div = Literal('/').setResultsName('div')
+divFloor = Literal('//').setResultsName('divFloor')
+mod = Literal('%').setResultsName('mod')
+plus = Literal('+').setResultsName('plus')
+minus = Literal('-').setResultsName('minus')
 
 #Bitwise Operations
 shiftLeft = Literal('<<')
@@ -136,19 +150,6 @@ bitwiseOr = Literal('|')
 bitwiseXor = Literal('^')
 complement = Literal('~')
 
-#Literals (Suppress showing up in results table)
-COMMA = Suppress(',')
-ENDCOMMA = Optional(',')
-LPAREN = Suppress("(")
-RPAREN = Suppress(")")
-LBRACK = Suppress("[")
-RBRACK = Suppress("]")
-COLON = Suppress(":")
-TICK = Suppress('`')
-SEMICOLON = Suppress(';')
-DOT = Suppress('.')
-COMMENT = Suppress(pythonStyleComment)
-KERNELDEC = Suppress('@kernel')
 
 #------------------------------------------------#
 # C O R E | G R A M M A R
@@ -166,15 +167,15 @@ testlist_comp = Forward()
 testlist = delimitedList(test) + ENDCOMMA
 testlist1 = delimitedList(test)
 #atom = testlist_comp ^ testlist1 ^ NAME ^ NUM ^ OneOrMore(STRING)
-atom = (LPAREN + testlist_comp + RPAREN) \
-       ^ TICK + testlist1 + TICK \
-       ^ (NAME | NUM | OneOrMore(STRING))
+atom = ((LPAREN + testlist_comp + RPAREN) \
+       ^ (TICK + testlist1 + TICK) \
+       ^ (NAME | NUM | OneOrMore(STRING))).setResultsName('atom')
 #Expr node is a building block of many grammars
 #[depends on #Argument Lists] => *Forwards trailer
 factor = Forward()
 trailer = Forward()
-power = atom + ZeroOrMore(trailer) + Optional('**' + factor)
-factor << ( ((plus ^ minus ^ complement) + factor) ^ power)
+power = (atom + ZeroOrMore(trailer) + Optional('**' + factor)).setResultsName("power")
+factor << (((plus ^ minus ^ complement) + factor) ^ power).setResultsName("factor")
 term = factor + ZeroOrMore((mult ^ div ^ mod ^ divFloor) + factor)
 arith_expr = term + ZeroOrMore((plus ^ minus) + term)
 shift_expr = arith_expr + ZeroOrMore((shiftLeft ^ shiftRight) + arith_expr)
@@ -203,8 +204,8 @@ list_iter = Forward()
 list_if = _if + test + Optional(list_iter)
 list_for = _for + exprlist + _in + testlist + Optional(list_iter)
 list_iter << (list_for ^ list_if)
-subscript = (test ^ test + COLON + test)
-subscriptlist = subscript + ZeroOrMore(COMMA + subscript) + ENDCOMMA
+subscript = (test ^ (test + COLON + test))
+subscriptlist = delimitedList(subscript) + ENDCOMMA
 
 #Argument Lists [depends on #List declarations]
 fpdef = Forward()
@@ -221,9 +222,9 @@ arglist = ZeroOrMore(argument + COMMA) \
            + Optional(COMMA + power + test)
            ^ power + test)
 
-trailer << ( LPAREN + Optional(arglist) + RPAREN
-          ^ LBRACK + subscriptlist + RBRACK
-          ^ DOT + NAME)
+trailer << ( (LPAREN + Optional(arglist) + RPAREN) \
+          ^ (LBRACK + subscriptlist + RBRACK) \
+          ^ (DOT + NAME)).setResultsName('trailer')
 lambdef = _lambda + Optional(varargslist) + COLON + test
 parameters = LPAREN + varargslist + RPAREN
 

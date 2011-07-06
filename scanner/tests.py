@@ -23,7 +23,7 @@ def basics():
 	#NUMBER
 	print "TESTING [NUM]"
 	tokens = grammar.atom.parseString("42").asDict()
-	assert('NUM' in tokens and tokens['NUM'] == '42')
+	assert('NUM' in tokens and tokens['NUM'] == '42'), 'NUM failed'
 	
 	#NAME
 	print "TESTING [NAME]"
@@ -33,12 +33,47 @@ def basics():
 	#INDENT
 	print "TESTING [INDENT]"
 	tokens = grammar.INDENT.parseString("\t\t").asDict()
-	assert('INDENT' in tokens)
+	assert('INDENT' in tokens), 'INDENT failed'
 	print tokens
 	
 	return True
+
+def trailer():
+	print "Running tests on [trailer]"
+	'''
+	trailer << ( LPAREN + Optional(arglist) + RPAREN
+          ^ LBRACK + subscriptlist + RBRACK
+          ^ DOT + NAME)
+	'''
+	print '.name'
+	tokens = grammar.trailer.parseString('.name')
+	print tokens.dump()
 	
+	print '(hello,hello,is,anybody,out,there)'
+	tokens = grammar.trailer.parseString('(hello,hello,is,anybody,out,there)')
+	print tokens.asXML()
+	
+	print tokens.dump()
+	print '[x==5]'
+	tokens = grammar.trailer.parseString('[x == 5]')
+	print tokens.dump()
+def power():
+	print "Running tests on [power]"
+	#power = (atom + ZeroOrMore(trailer) + Optional('**' + factor)).setResultsName("power")
+	tokens = grammar.power.parseString("42.3")
+	tokens = grammar.power.parseString("name.trailer")
+	
+def factor():
+	print "Running tests on [factor]"
+	#factor << ( ((plus ^ minus ^ complement) + factor) ^ power).setResultsName("factor")
+	tokens = grammar.factor.parseString("42").dump()
+	print tokens
+
+	tokens = grammar.factor.parseString("+ 5").dump()
+	print tokens
 	
 
-basics()
-
+#basics()
+#factor()
+#power()
+trailer()
