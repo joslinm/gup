@@ -93,9 +93,17 @@ def stmt():
 	print tokens.dump()
 	#tokens = grammar.expr_stmt.parseString("x * 5")
 	#print tokens.dump()
+
+def file_input():
+	data = '''x == 5'''
+	tokens = grammar.file_input.parseFile("code_test.gup")
+	print tokens.dump()
 #basics()
 #factor()
 #power()
 #trailer()
 #expr()
-stmt()
+#stmt()
+#stmt()
+
+file_input()

@@ -53,7 +53,7 @@ To work around this, replace the '|'s with '^'s - you'll take a hit in parsing s
 but this may help you identify some subtle issues in your grammar.
 '''
 
-ParserElement.setDefaultWhitespaceChars(" \n")
+ParserElement.setDefaultWhitespaceChars(" ")
 #------------------------------------------------#
 # E L E M E N T S
 #------------------------------------------------#
@@ -74,7 +74,7 @@ COMMENT = Suppress(pythonStyleComment)
 NAME = Word(alphas)("NAME")
 NUM = (Word(nums) + Optional(DOT + Word(nums)))("NUM")
 STRING = (dblQuotedString ^ sglQuotedString)("STRING")
-NEWLINE = Suppress(StringEnd())
+NEWLINE = LineEnd()
 #TODO: INDENT + DEDENT need parse actions to validate indentation
 TAB = White('\t', exact=1)
 INDENT = ((StringStart() + (OneOrMore(TAB))).parseWithTabs())("INDENT")
@@ -274,7 +274,7 @@ small_stmt = (expr_stmt ^ print_stmt ^ del_stmt ^ pass_stmt ^ flow_stmt \
 simple_stmt << (delimitedList(small_stmt, delim=';') + Optional(SEMICOLON) + NEWLINE)
 compound_stmt = (if_stmt ^ while_stmt ^ for_stmt ^ funcdef ^ classdef ^ decorated) \
 	('compound_stmt')
-stmt << (simple_stmt ^ compound_stmt)
+stmt << (simple_stmt ^ compound_stmt).setName("stmt").setDebug()
 
 #Top of our parser
-file_input = (ZeroOrMore(stmt + NEWLINE))('file_input')
+file_input = (ZeroOrMore(stmt + NEWLINE)).setName("file_input").setDebug()('file_input')
