@@ -81,8 +81,21 @@ def expr():
 	print 'x * 5'
 	tokens = grammar.expr.parseString("x * 5")
 	print tokens.dump()
+
+def expr_stmt():
+	print "Running tests on [expr_list]"
+	#expr_stmt = (testlist + ZeroOrMore((augassign + testlist) ^ (assign + testlist)))('expr_stmt')
+	
+	data = 'x * 5'
+	#tokens = grammar.test.parseString(data)
+	#print tokens.dump()
+	tokens = grammar.testlist.parseString(data)
+	print tokens.dump()
+	#tokens = grammar.expr_stmt.parseString("x * 5")
+	#print tokens.dump()
 #basics()
 #factor()
 #power()
 #trailer()
-expr()
+#expr()
+expr_stmt()

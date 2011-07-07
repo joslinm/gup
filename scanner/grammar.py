@@ -164,8 +164,7 @@ import_stmt = import_name('import_stmt')
 #[depends on #Comparison nodes] => *Forwards test
 test = Forward()('test')
 testlist_comp = Forward()('testlist_comp')
-testlist = (delimitedList(test) + ENDCOMMA)('testlist')
-testlist1 = (delimitedList(test)('testlist1'))
+testlist1 = Forward()('testlist1')
 atom = ((LPAREN + testlist_comp + RPAREN) \
        ^ (TICK + testlist1 + TICK) \
        ^ (NAME | NUM | OneOrMore(STRING)))('atom')
@@ -199,6 +198,8 @@ comp_for = (_for + exprlist + _in + or_test + Optional(comp_iter))('comp_for')
 comp_if = (_if + test + Optional(comp_iter))('comp_if')
 comp_iter << (comp_for ^ comp_if)
 testlist_comp << (test + (comp_for ^ ZeroOrMore(COMMA + test) + ENDCOMMA))
+testlist = (delimitedList(test) + ENDCOMMA)('testlist')
+testlist1 << (delimitedList(test)('testlist1'))
 
 #List declarations [depends on #Test Node & #Expr Node]
 list_iter = Forward()('list_iter')
