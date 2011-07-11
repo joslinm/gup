@@ -2,8 +2,14 @@
 #include <stdio.h>
 #include "CL/cl.h"
 
-// Typedefs and shit
-//#define matrix cl_float*
+#define gup_int cl_int
+#define gup_uint cl_uint
+#define gup_float cl_float
+
+#define gup_kernel cl_kernel
+#define gup_mem cl_mem
+
+#define gup_matrix cl_float*
 
 // Context and device
 cl_context gupContext;
@@ -50,7 +56,8 @@ void gupCreateContext(){
 
 void gupCreateProgram(){
 	cl_int err;
-	gupProgram = clCreateProgramWithSource(gupContext, 1 ,(const char **) &gupKernelSrc, NULL, &err);
+	gupProgram = clCreateProgramWithSource(gupContext, 1 ,(const char **) &gupKernelSrc, 
+												   NULL, &err);
 	if (err != CL_SUCCESS) {
 		printf("Unable to create program object. Error Code=%d\n",err);
 		exit(1);
@@ -62,7 +69,8 @@ void gupCreateProgram(){
 		size_t len;
 		char buffer[4096];
 		// get the build log
-		clGetProgramBuildInfo(gupProgram, gupDevice, CL_PROGRAM_BUILD_LOG, sizeof(buffer), buffer, &len);
+		clGetProgramBuildInfo(gupProgram, gupDevice, CL_PROGRAM_BUILD_LOG, 
+								  sizeof(buffer), buffer, &len);
 		printf("--- Build Log -- \n %s\n", buffer);
 		exit(1);
 	}
@@ -85,14 +93,20 @@ void gupInit(cl_uint device_type){
 	}
 }
 
-cl_mem readFloatBuffer(cl_uint size, cl_float* data){
-	cl_mem newBuffer = clCreateBuffer(gupContext, CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR, 
+void gupClose() {
+	clReleaseProgram(gupProgram);
+	clReleaseCommandQueue(gupCmdQueue);
+	clReleaseContext(gupContext);
+}
+
+gup_mem newReadFloatBuffer(cl_uint size, cl_float* data){
+	gup_mem newBuffer = clCreateBuffer(gupContext, CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR, 
 									sizeof(cl_float)*size, data, NULL);
 	return newBuffer;
 }
 
-cl_mem writeFloatBuffer(cl_uint size){
-	cl_mem newBuffer = clCreateBuffer(gupContext, CL_MEM_WRITE_ONLY, 
+gup_mem newWriteFloatBuffer(cl_uint size){
+	gup_mem newBuffer = clCreateBuffer(gupContext, CL_MEM_WRITE_ONLY, 
 									sizeof(cl_float)*size, NULL, NULL);
 	return newBuffer;
 }
@@ -118,6 +132,33 @@ void gupLoadKernel(const char*fname){
 	gupKernelSrc[filelen+1]='\0';
 }
 
+void gupEnqueueRangeKernel(gup_kernel kernel, gup_int dimentions, 
+							   size_t* global, size_t* local) {
+	// Enqueue the kernel object
+	cl_int err;
+	err = clEnqueueNDRangeKernel(gupCmdQueue, kernel, dimentions, NULL, 
+								 global, local, 0, NULL, NULL);
+	if (err != CL_SUCCESS) {
+		printf("Unable to enqueue kernel command. Error Code=%d\n",err);
+		exit(1);
+	}
+}
+
+void gupFinish(){
+	clFinish(gupCmdQueue);
+}
+
+void readFloatBuffer(gup_mem source, gup_int size, gup_float* destination){
+	// read the output back to host memory
+		cl_int err;
+	err = clEnqueueReadBuffer(gupCmdQueue, source, CL_TRUE, 0, sizeof(cl_float)*size, 
+								  destination, 0, NULL, NULL);
+	if (err != CL_SUCCESS) {
+		printf("Error enqueuing read buffer command. Error Code=%d\n",err);
+		exit(1);
+	}
+}
+
 cl_kernel gupCreateKernel(const char*name){
 	// Finally create the kernel
 	cl_int err;
@@ -126,20 +167,11 @@ cl_kernel gupCreateKernel(const char*name){
 		printf("Unable to create kernel object. Error Code=%d\n",err);
 		exit(1);
 	}
-	//printf("Hello!\n");
 	return newKernel;
 }
 
-cl_float* newMatrix(int size){
-	cl_float* mat;
+gup_matrix newMatrix(int size){
+	gup_matrix mat;
 	mat = malloc(sizeof(cl_float) * size);
-	/*
-	int i;
-	for(i=0;i<size;i++) {
-		inputMatrix1[i] = 0;
-		inputMatrix2[i] = 0;
-		results[i] = 0;
-	}
-	*/
 	return mat;
 }
