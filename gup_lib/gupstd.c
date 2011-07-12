@@ -2,13 +2,6 @@
 #include <stdio.h>
 #include "CL/cl.h"
 
-#define gup_int cl_int
-#define gup_uint cl_uint
-#define gup_float cl_float
-
-#define gup_kernel cl_kernel
-#define gup_mem cl_mem
-
 #define gup_matrix cl_float*
 
 // Context and device
@@ -99,14 +92,14 @@ void gupClose() {
 	clReleaseContext(gupContext);
 }
 
-gup_mem newReadFloatBuffer(cl_uint size, cl_float* data){
-	gup_mem newBuffer = clCreateBuffer(gupContext, CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR, 
+cl_mem newReadFloatBuffer(cl_uint size, cl_float* data){
+	cl_mem newBuffer = clCreateBuffer(gupContext, CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR, 
 									sizeof(cl_float)*size, data, NULL);
 	return newBuffer;
 }
 
-gup_mem newWriteFloatBuffer(cl_uint size){
-	gup_mem newBuffer = clCreateBuffer(gupContext, CL_MEM_WRITE_ONLY, 
+cl_mem newWriteFloatBuffer(cl_uint size){
+	cl_mem newBuffer = clCreateBuffer(gupContext, CL_MEM_WRITE_ONLY, 
 									sizeof(cl_float)*size, NULL, NULL);
 	return newBuffer;
 }
@@ -132,7 +125,7 @@ void gupLoadKernel(const char*fname){
 	gupKernelSrc[filelen+1]='\0';
 }
 
-void gupEnqueueRangeKernel(gup_kernel kernel, gup_int dimentions, 
+void gupEnqueueRangeKernel(cl_kernel kernel, cl_int dimentions, 
 							   size_t* global, size_t* local) {
 	// Enqueue the kernel object
 	cl_int err;
@@ -148,9 +141,9 @@ void gupFinish(){
 	clFinish(gupCmdQueue);
 }
 
-void readFloatBuffer(gup_mem source, gup_int size, gup_float* destination){
+void readFloatBuffer(cl_mem source, cl_int size, cl_float* destination){
 	// read the output back to host memory
-		cl_int err;
+	cl_int err;
 	err = clEnqueueReadBuffer(gupCmdQueue, source, CL_TRUE, 0, sizeof(cl_float)*size, 
 								  destination, 0, NULL, NULL);
 	if (err != CL_SUCCESS) {
