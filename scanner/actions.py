@@ -1,31 +1,34 @@
 from pyparsing import *
-#INDENTATION HANDLING
-indentStack = [1]
+#Indentation Handling
+indent = 0
+def checkIndent(t):
+	global indent
+	if len(t) > 0:
+		tabs = t[0]
+		tabs_l = tabs.split('\t')		
+		new_indent = len(tabs_l) - 1
+		
+		if(new_indent - indent > 1):
+			raise ParseException("Excess indentation")
+		else:
+			indent = new_indent
 
-def checkPeerIndent(s,l,t):
-	curCol = col(l,s)
-	if curCol != indentStack[-1]:
-		if(not indentStack) or curCol > indentStack[-1]:
-			raise ParseFatalException(s,l,"illegal nesting")
-		raise ParseException(s,l,"Not a peer entry")
+def checkUndent(t):
+	global indent
+	if len(t) > 0:
+		tabs = t[0]
+		tabs_l = tabs.split('\t')
+		new_indent = len(tabs_l) - 1
+		
+		if(new_indent + 1 != indent):
+			raise ParseException("Invalid dedentation")
+		else:
+			indent = new_indent
 
-def checkSubIndent(s,l,t):
-	curCol = col(l,s)
-	if curCol > indentStack[-1]:
-		indentStack.append(curCol)
-	else:
-		raise ParseException(s,l,"Not a sub-entry")
-
-def checkUnindent(s,l,t):
-	if l >= len(s):
-		return
-	curCol = col(l,s)
-	if not(curCol < indentStack[-1] and curCol <= indentStack[-2]):
-		raise ParseException(s,l,"Not an unindent")
-
-def doUnindent():
-	indentStack.pop()
-
-class Expression(object):
-	def __init__(self, t):
-		print t
+#Classes that grammar will break into its respective objects)
+class IfStatement(object):
+	def __init__(self,t):
+		self.arg = t
+		print t.asList()
+	def __str__(self):
+		return self.arg.asXML()

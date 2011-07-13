@@ -100,12 +100,17 @@ def file_input():
 	\tx*5'''
 	tokens = grammar.file_input.parseFile("code_test.gup")
 	print tokens.dump()
+
+def indent():
+	data = "\t"
+	tokens = grammar.INDENT.parseString(data)
+	print tokens.dump()
 #basics()
 #factor()
 #power()
 #trailer()
 #expr()
 #stmt()
+#indent()
 stmt()
-
 #file_input()
