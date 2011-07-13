@@ -12,19 +12,25 @@ int main() {
 	printf("Initializing matrices...");
 	// inputMatrix1 = newMatrix(width*height)
 	// inputMatrix2 = newMatrix(width*height)
-	// results = newMatrix(width*height)
+	// multMatrix = newMatrix(width*height)
+	// transMatrix = newMatrix(width*height)
 	gup_matrix inputMatrix1 = newMatrix(width*height);
 	gup_matrix inputMatrix2 = newMatrix(width*height);
-	gup_matrix results = newMatrix(width*height);
+	gup_matrix multMatrix = newMatrix(width*height);
+	gup_matrix multMatrix2 = newMatrix(width*height);
+	///gup_matrix transMatrix = newMatrix(width*height);
 	// for i=0 to width*height:
 	//     inputMatrix1[i] = i / 100.0f;
 	//     inputMatrix2[i] = i / 100.0f;
-	//     results[i] = 0;
+	//     multMatrix[i] = 0;
+	//     transMatrix[i] = 0;
 	int i;
 	for(i=0;i<width*height;i++) {
 		inputMatrix1[i] = i / 100.0f;
 		inputMatrix2[i] = i / 100.0f;
-		results[i] = 0;
+		multMatrix[i] = 0;
+		multMatrix2[i] = 0;
+		///transMatrix[i] = 0;
 	}
 	printf("done\n");
 	
@@ -54,6 +60,7 @@ int main() {
 	/// the source file will be freed from memory
 	/// Maybe there can be an array of kernels or something...
 	cl_kernel kernel = gupCreateKernel("multMatrixSimple");
+	cl_kernel kernel2 = gupCreateKernel("multMatrix");
 	free(gupKernelSrc);
 	
 	/// Something needs to be done about setting kernel args
@@ -69,32 +76,58 @@ int main() {
 		printf("Unable to set kernel arguments. Error Code=%d\n",err);
 		exit(1);
 	}
+	if (clSetKernelArg(kernel2, 0, sizeof(cl_mem), &output_buffer) ||
+		clSetKernelArg(kernel2, 1, sizeof(cl_mem), &input_buffer1) ||
+		clSetKernelArg(kernel2, 2, sizeof(cl_mem), &input_buffer2) ||
+		clSetKernelArg(kernel2, 3, sizeof(cl_uint), &width) ||
+		clSetKernelArg(kernel2, 4, sizeof(cl_uint), &height) != CL_SUCCESS) {
+		printf("Unable to set kernel arguments. Error Code=%d\n",err);
+		exit(1);
+	}
 	printf("done\n");
 	
 	printf("Enqueue-ing and running kernel...");
 	/// Assuming we make an array of kernels to run, 0 is the first kernel
 	// runRangeKernel(0, 2, global, local)
-	gupEnqueueRangeKernel(kernel, 2, global, local);
+	gupEnqueue2DRangeKernel(kernel, global, local);
 	gupFinish(); // Wait until kernel completes
 	printf("done\n");
 	
 	printf("Reading output data...");
 	/// This could actually be remembered and generated here
 	/// rather than having the following line of code, i think
-	// results = readFloatBuffer(output_buffer, width*height)
-	readFloatBuffer(output_buffer, width*height, results);
+	// multMatrix = readFloatBuffer(output_buffer, width*height)
+	readFloatBuffer(output_buffer, width*height, multMatrix);
+	printf("done\n");
+	
+	printf("Enqueue-ing and running optimized kernel...");
+	/// Assuming we make an array of kernels to run, 1 is the second kernel
+	// runRangeKernel(1, 2, global, local)
+	gupEnqueue2DRangeKernel(kernel2, global, local);
+	gupFinish(); // Wait until kernel completes
+	printf("done\n");
+	
+	printf("Reading output data...");
+	// multMatrix = readFloatBuffer(output_buffer, width*height)
+	readFloatBuffer(output_buffer, width*height, multMatrix2);
 	printf("done\n");
 	
 	printf("Saving matrix to file...");
 	// file = open("matrix_output.txt")
 	// for y=0 to height:
 	//     for x=0 to width:
-	//         write(file, results[y*width+x] + ", ")
+	//         write(file, multMatrix[y*width+x] + ", ")
 	//     writeln(file)
 	int x, y;
 	FILE*file = fopen("matrix_output.txt","w");
+	fprintf(file, "Simple Multiplication:\n");
 	for(y=0;y<height;y++) {
-	   for(x=0;x<width;x++) fprintf(file, "%.2f, ",results[y*height+x]);
+	   for(x=0;x<width;x++) fprintf(file, "%.2f, ",multMatrix[y*height+x]);
+	   fprintf(file, "\n");
+	}
+	fprintf(file, "\nOptimized Multiplication:\n");
+	for(y=0;y<height;y++) {
+	   for(x=0;x<width;x++) fprintf(file, "%.2f, ",multMatrix2[y*height+x]);
 	   fprintf(file, "\n");
 	}
 	printf("done\n");
@@ -108,7 +141,8 @@ int main() {
 	gupClose();
 	free(inputMatrix1);
 	free(inputMatrix2);
-	free(results);
+	free(multMatrix);
+	free(multMatrix2);
 	fclose(file);
 	printf("done\n");
 	

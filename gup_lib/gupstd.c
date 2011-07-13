@@ -125,11 +125,10 @@ void gupLoadKernel(const char*fname){
 	gupKernelSrc[filelen+1]='\0';
 }
 
-void gupEnqueueRangeKernel(cl_kernel kernel, cl_int dimentions, 
-							   size_t* global, size_t* local) {
+void gupEnqueue2DRangeKernel(cl_kernel kernel, size_t* global, size_t* local) {
 	// Enqueue the kernel object
 	cl_int err;
-	err = clEnqueueNDRangeKernel(gupCmdQueue, kernel, dimentions, NULL, 
+	err = clEnqueueNDRangeKernel(gupCmdQueue, kernel, 2, NULL, 
 								 global, local, 0, NULL, NULL);
 	if (err != CL_SUCCESS) {
 		printf("Unable to enqueue kernel command. Error Code=%d\n",err);
