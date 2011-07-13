@@ -86,24 +86,35 @@ def stmt():
 	print "Running tests on [stmt]"
 	#expr_stmt = (testlist + ZeroOrMore((augassign + testlist) ^ (assign + testlist)))('expr_stmt')
 	
-	data = 'x * 5'
+	data = '''x == 5:
+	\tx*5'''
 	#tokens = grammar.test.parseString(data)
 	#print tokens.dump()
-	tokens = grammar.file_input.parseString(data)
-	print tokens.dump()
+	tokens = grammar.file_input.parseFile("code_test.gup")
+	#print tokens.dump()
+
 	#tokens = grammar.expr_stmt.parseString("x * 5")
 	#print tokens.dump()
 
 def file_input():
-	data = '''x == 5'''
+	data = '''x == 5:
+	\tx*5'''
 	tokens = grammar.file_input.parseFile("code_test.gup")
+	
 	print tokens.dump()
+
+def indent():
+	data = "\t"
+	tokens = grammar.INDENT.parseString(data)
+	print tokens.dump()
+
 #basics()
 #factor()
 #power()
 #trailer()
 #expr()
 #stmt()
-#stmt()
 
-file_input()
+stmt()
+
+
