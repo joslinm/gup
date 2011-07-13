@@ -74,8 +74,9 @@ COMMENT = Suppress(pythonStyleComment)
 NAME = Word(alphas)("NAME")
 NUM = (Word(nums) + Optional(DOT + Word(nums)))("NUM")
 STRING = (dblQuotedString ^ sglQuotedString)("STRING")
-NEWLINE = LineEnd()
-#TEST: INDENT + DEDENT need parse actions to validate indentation
+NEWLINE = lineEnd
+
+#Indentation
 TAB = White('\t', exact=1)
 INDENT = lineEnd.suppress() + empty + empty.copy().setParseAction(actions.checkSubIndent)
 UNDENT = FollowedBy(empty).setParseAction(actions.checkUnindent)
