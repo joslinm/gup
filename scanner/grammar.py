@@ -197,7 +197,7 @@ not_test = Forward()('not_test')
 not_test << ((_not +  not_test) ^ comparison)#.setDebug().setName("test")
 and_test = (not_test + ZeroOrMore(_and + not_test))('and_test')
 or_test = (and_test + ZeroOrMore(_or + and_test))('or_test')
-test << (or_test + Optional(_if + or_test + _else + test))
+test << Group(or_test + Optional(_if + or_test + _else + test))('test')
 comp_iter = Forward()('comp_iter')
 comp_for = (_for + exprlist + _in + or_test + Optional(comp_iter))('comp_for')
 comp_if = (_if + test + Optional(comp_iter))('comp_if')
@@ -234,19 +234,19 @@ trailer << ( (LPAREN + Optional(arglist) + RPAREN) \
           ^ (LBRACK + subscriptlist + RBRACK) \
           ^ (DOT + NAME))('trailer')
 lambdef = (_lambda + Optional(varargslist) + COLON + test)('lambdef')
-parameters = (LPAREN + varargslist + RPAREN)('parameters')
+parameters = (LPAREN + Optional(varargslist) + RPAREN)('parameters')
 
 
 #Block statements [depends on #Top Level Statements] => *Forwards simple_stmt & stmt
 simple_stmt = Forward()('simple_stmt')
 stmt = Forward()('stmt')
 suite = Group((simple_stmt ^ (NEWLINE + INDENT + OneOrMore(stmt) + UNDENT)))('suite')#.setDebug().setName("suite")
-if_stmt = (_if + Group(test) + COLON + suite + ZeroOrMore(_elif + test + COLON + suite) \
+if_stmt = (_if + test + COLON + suite + ZeroOrMore(_elif + test + COLON + suite) \
 		+ Optional(_else + COLON + suite))('if_stmt').setParseAction(actions.IfStatement)#.setDebug().setName("if statement")
 for_stmt = (_for + exprlist + _in + testlist + COLON + suite \
-		+ Optional(_else + COLON + suite))('for_stmt')
-while_stmt = (_while + test + COLON + suite + Optional(_else + COLON + suite))('while')
-funcdef = (_def + NAME + parameters + COLON + suite)('funcdef')
+		+ Optional(_else + COLON + suite))('for_stmt').setParseAction(actions.ForStatement)
+while_stmt = (_while + test + COLON + suite + Optional(_else + COLON + suite))('while').setParseAction(actions.WhileStatement)
+funcdef = (_def + NAME + parameters + COLON + suite)('funcdef').setParseAction(actions.FunctionDeclaration)
 return_stmt = (_return + Optional(testlist))('return_stmt')
 
 #Block flow control statments
@@ -258,7 +258,7 @@ flow_stmt = (break_stmt ^ continue_stmt ^ return_stmt) ('flow_stmt')
 #Class Declarations [depends on #Block Statements]
 classdef = (_class + NAME + Optional(LPAREN + testlist + RPAREN) + COLON + suite)('classdef')
 decorator_kernel = (KERNELDEC + Optional(LPAREN + arglist + RPAREN) + NEWLINE)('decorator_kernel')
-decorated = (decorator_kernel + (classdef ^ funcdef))('decorated')
+decorated = (decorator_kernel + (classdef ^ funcdef))('decorated').setDebug().setName("dec kernel")
 
 #Other Statements
 augassign = (plusAssign ^ minusAssign ^ multAssign ^ divAssign ^ modAssign \

@@ -1,4 +1,6 @@
 from pyparsing import *
+import pprint
+
 #Indentation Handling
 indent = 0
 def checkIndent(t):
@@ -29,6 +31,25 @@ def checkUndent(t):
 class IfStatement(object):
 	def __init__(self,t):
 		self.arg = t
-		print t.asList()
+		pprint.pprint(t.asList())
+	def __str__(self):
+		return self.arg.asXML()
+
+class ForStatement(object):
+	def __init__(self,t):
+		self.arg = t
+		pprint.pprint(t.asList())
+	def __str__(self):
+		return self.arg.asXML()
+class WhileStatement(object):
+	def __init__(self,t):
+		self.arg = t
+		pprint.pprint(t.asList())
+	def __str__(self):
+		return self.arg.asXML()
+class FunctionDeclaration(object):
+	def __init__(self,t):
+		self.arg = t
+		pprint.pprint(t.asList())
 	def __str__(self):
 		return self.arg.asXML()

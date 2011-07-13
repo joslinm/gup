@@ -99,6 +99,7 @@ def file_input():
 	data = '''x == 5:
 	\tx*5'''
 	tokens = grammar.file_input.parseFile("code_test.gup")
+	
 	print tokens.dump()
 
 def indent():
