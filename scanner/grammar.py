@@ -37,7 +37,12 @@ XXX
     atom wasn't implemented properly
     (line no. 162)
 
-- file_input isn't matching anything            [ ]
+- file_input isn't matching anything            [x]
+	
+	__Resolution__
+	works now 
+
+- Does not match names with _					[ ]
 '''
 
 ### SAFE (and slow)
@@ -258,7 +263,7 @@ flow_stmt = (break_stmt ^ continue_stmt ^ return_stmt) ('flow_stmt')
 #Class Declarations [depends on #Block Statements]
 classdef = (_class + NAME + Optional(LPAREN + testlist + RPAREN) + COLON + suite)('classdef')
 decorator_kernel = (KERNELDEC + Optional(LPAREN + arglist + RPAREN) + NEWLINE)('decorator_kernel')
-decorated = (decorator_kernel + (classdef ^ funcdef))('decorated').setDebug().setName("dec kernel")
+decorated = (decorator_kernel + (classdef ^ funcdef))('decorated').setParseAction(actions.FunctionDeclaration)#.setDebug().setName("dec kernel")
 
 #Other Statements
 augassign = (plusAssign ^ minusAssign ^ multAssign ^ divAssign ^ modAssign \
