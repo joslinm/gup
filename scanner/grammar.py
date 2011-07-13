@@ -74,12 +74,17 @@ COMMENT = Suppress(pythonStyleComment)
 NAME = Word(alphas)("NAME")
 NUM = (Word(nums) + Optional(DOT + Word(nums)))("NUM")
 STRING = (dblQuotedString ^ sglQuotedString)("STRING")
-NEWLINE = LineEnd()
-#TODO: INDENT + DEDENT need parse actions to validate indentation
-TAB = White('\t', exact=1)
-INDENT = ((StringStart() + (OneOrMore(TAB))).parseWithTabs())("INDENT")
-#XXX Removing Dedent.. need to set parse action instead. Only here as filler for suite
-DEDENT = Forward()
+NEWLINE = lineEnd.suppress()
+
+#Indentation
+TAB = White('\t')
+#INDENT = lineEnd.suppress() + empty + empty.copy().setParseAction(actions.checkSubIndent)
+#UNDENT = FollowedBy(empty).setParseAction(actions.checkUnindent)
+#UNDENT.setParseAction(actions.doUnindent)
+INDENT = OneOrMore(TAB).parseWithTabs().suppress()
+UNDENT = ZeroOrMore(TAB).parseWithTabs().suppress()
+INDENT.setParseAction(actions.checkIndent)
+UNDENT.setParseAction(actions.checkUndent)
 
 #Comparisons
 greater = Literal('>')('greater')
@@ -96,14 +101,14 @@ _and = Keyword('and')('and')
 _or = Keyword('or')('or')
 
 #Flow Control
-_while = Keyword('while')('while')
-_if = Keyword('if')('if')
-_else = Keyword('else')('else')
-_elif = Keyword('elif')('elif')
-_for = Keyword('for')('for')
-_continue = Keyword('continue')('continue')
-_pass = Keyword('pass')('pass')
-_break = Keyword('break')('break')
+_while = Keyword('while')
+_if = Keyword('if')
+_else = Keyword('else')
+_elif = Keyword('elif')
+_for = Keyword('for')
+_continue = Keyword('continue')
+_pass = Keyword('pass')
+_break = Keyword('break')
 
 #Utility Keywords
 KERNELDEC = Keyword('@kernel')("KERNELDEC")
@@ -189,10 +194,10 @@ comp_op = (greater^lesser^greaterOrEqual^lesserOrEqual^equal^notequal^_is^_in^_n
           ^ _not + _in ^ _is + _not)('comp_op')
 comparison = (expr + ZeroOrMore(comp_op + expr))('comparison')
 not_test = Forward()('not_test')
-not_test << ((_not +  not_test) ^ comparison)
+not_test << ((_not +  not_test) ^ comparison)#.setDebug().setName("test")
 and_test = (not_test + ZeroOrMore(_and + not_test))('and_test')
 or_test = (and_test + ZeroOrMore(_or + and_test))('or_test')
-test << (or_test + Optional(_if + or_test + _else + test))
+test << Group(or_test + Optional(_if + or_test + _else + test))('test')
 comp_iter = Forward()('comp_iter')
 comp_for = (_for + exprlist + _in + or_test + Optional(comp_iter))('comp_for')
 comp_if = (_if + test + Optional(comp_iter))('comp_if')
@@ -229,21 +234,19 @@ trailer << ( (LPAREN + Optional(arglist) + RPAREN) \
           ^ (LBRACK + subscriptlist + RBRACK) \
           ^ (DOT + NAME))('trailer')
 lambdef = (_lambda + Optional(varargslist) + COLON + test)('lambdef')
-parameters = (LPAREN + varargslist + RPAREN)('parameters')
+parameters = (LPAREN + Optional(varargslist) + RPAREN)('parameters')
 
 
 #Block statements [depends on #Top Level Statements] => *Forwards simple_stmt & stmt
 simple_stmt = Forward()('simple_stmt')
 stmt = Forward()('stmt')
-#XXX Need to remove DEDENT as it matches INDENT just the same..
-#XXX Need to place a action statement to verify the ending DEDENT
-suite = (simple_stmt ^ (NEWLINE + INDENT + OneOrMore(stmt) + DEDENT))('suite')
+suite = Group((simple_stmt ^ (NEWLINE + INDENT + OneOrMore(stmt) + UNDENT)))('suite')#.setDebug().setName("suite")
 if_stmt = (_if + test + COLON + suite + ZeroOrMore(_elif + test + COLON + suite) \
-		+ Optional(_else + COLON + suite))('if_stmt')
+		+ Optional(_else + COLON + suite))('if_stmt').setParseAction(actions.IfStatement)#.setDebug().setName("if statement")
 for_stmt = (_for + exprlist + _in + testlist + COLON + suite \
-		+ Optional(_else + COLON + suite))('for_stmt')
-while_stmt = (_while + test + COLON + suite + Optional(_else + COLON + suite))('while')
-funcdef = (_def + NAME + parameters + COLON + suite)('funcdef')
+		+ Optional(_else + COLON + suite))('for_stmt').setParseAction(actions.ForStatement)
+while_stmt = (_while + test + COLON + suite + Optional(_else + COLON + suite))('while').setParseAction(actions.WhileStatement)
+funcdef = (_def + NAME + parameters + COLON + suite)('funcdef').setParseAction(actions.FunctionDeclaration)
 return_stmt = (_return + Optional(testlist))('return_stmt')
 
 #Block flow control statments
@@ -255,7 +258,7 @@ flow_stmt = (break_stmt ^ continue_stmt ^ return_stmt) ('flow_stmt')
 #Class Declarations [depends on #Block Statements]
 classdef = (_class + NAME + Optional(LPAREN + testlist + RPAREN) + COLON + suite)('classdef')
 decorator_kernel = (KERNELDEC + Optional(LPAREN + arglist + RPAREN) + NEWLINE)('decorator_kernel')
-decorated = (decorator_kernel + (classdef ^ funcdef))('decorated')
+decorated = (decorator_kernel + (classdef ^ funcdef))('decorated').setDebug().setName("dec kernel")
 
 #Other Statements
 augassign = (plusAssign ^ minusAssign ^ multAssign ^ divAssign ^ modAssign \
@@ -270,11 +273,11 @@ print_stmt = (_print + Optional(delimitedList(test) + ENDCOMMA))('print_stmt')
 #Top level statements
 expr_stmt = (testlist + ZeroOrMore((augassign + testlist) ^ (assign + testlist)))('expr_stmt')
 small_stmt = (expr_stmt ^ print_stmt ^ del_stmt ^ pass_stmt ^ flow_stmt \
-		^ import_stmt ^ global_stmt ^ assert_stmt)('small_stmt')
-simple_stmt << (delimitedList(small_stmt, delim=';') + Optional(SEMICOLON) + NEWLINE)
+		^ import_stmt ^ global_stmt ^ assert_stmt)('small_stmt')#.setDebug().setName("small_stmt")
+simple_stmt << (delimitedList(small_stmt, delim=';') + Optional(SEMICOLON) + NEWLINE)#.setDebug().setName("simple statement")
 compound_stmt = (if_stmt ^ while_stmt ^ for_stmt ^ funcdef ^ classdef ^ decorated) \
-	('compound_stmt')
-stmt << (simple_stmt ^ compound_stmt).setName("stmt").setDebug()
+	('compound_stmt').setName("compound statement")#.setDebug()
+stmt << (simple_stmt ^ compound_stmt).setName("stmt")#.setDebug()
 
 #Top of our parser
-file_input = (ZeroOrMore(stmt + NEWLINE)).setName("file_input").setDebug()('file_input')
+file_input = (ZeroOrMore(stmt | NEWLINE)).parseWithTabs()
