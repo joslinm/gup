@@ -1,6 +1,8 @@
 from pyparsing import *
 import pprint
 
+symbol_table = []
+
 #Indentation Handling
 indent = 0
 def checkIndent(t):
@@ -27,7 +29,7 @@ def checkUndent(t):
 		else:
 			indent = new_indent
 
-#Classes that grammar will break into its respective objects)
+#Classes that grammar will break into its respective objects
 class IfStatement(object):
 	def __init__(self,t):
 		self.arg = t
@@ -53,3 +55,10 @@ class FunctionDeclaration(object):
 		pprint.pprint(t.asList())
 	def __str__(self):
 		return self.arg.asXML()
+class Argument(object):
+	def __init__(self, t):
+		self.arg = t
+		pprint.pprint(t.asList())
+class Test(object):
+	def __init__(self,t):
+		self.arg = t

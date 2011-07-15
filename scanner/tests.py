@@ -83,7 +83,7 @@ def expr():
 	print tokens.dump()
 
 def stmt():
-	print "Running tests on [stmt]"
+	print "Running tests.."
 	#expr_stmt = (testlist + ZeroOrMore((augassign + testlist) ^ (assign + testlist)))('expr_stmt')
 	
 	data = '''x == 5:

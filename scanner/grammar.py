@@ -83,9 +83,6 @@ NEWLINE = lineEnd.suppress()
 
 #Indentation
 TAB = White('\t')
-#INDENT = lineEnd.suppress() + empty + empty.copy().setParseAction(actions.checkSubIndent)
-#UNDENT = FollowedBy(empty).setParseAction(actions.checkUnindent)
-#UNDENT.setParseAction(actions.doUnindent)
 INDENT = OneOrMore(TAB).parseWithTabs().suppress()
 UNDENT = ZeroOrMore(TAB).parseWithTabs().suppress()
 INDENT.setParseAction(actions.checkIndent)
@@ -172,7 +169,7 @@ import_stmt = import_name('import_stmt')
 
 #Test & atom node are two building blocks of many grammars
 #[depends on #Comparison nodes] => *Forwards test
-test = Forward()('test')
+test = Forward()('test').setParseAction(actions.Test)
 testlist_comp = Forward()('testlist_comp')
 testlist1 = Forward()('testlist1')
 atom = ((LPAREN + testlist_comp + RPAREN) \
@@ -229,7 +226,7 @@ varargslist = (ZeroOrMore(fpdef + Optional(assign + test) + COMMA) \
 		+ ZeroOrMore(COMMA + fpdef + Optional(assign + test) + ENDCOMMA))) \
 		('varargslist')
 
-argument = (test + Optional(comp_for) ^ test + assign + test)('argument')
+argument = ( (test + Optional(comp_for)) ^ test + assign + test)('argument')
 arglist = (ZeroOrMore(argument + COMMA) \
           + (argument + Optional(COMMA)^ mult + test + ZeroOrMore(COMMA + argument)
            + Optional(COMMA + power + test)
@@ -276,7 +273,7 @@ del_stmt = (_delete + exprlist)('del_stmt')
 print_stmt = (_print + Optional(delimitedList(test) + ENDCOMMA))('print_stmt')
 
 #Top level statements
-expr_stmt = (testlist + ZeroOrMore((augassign + testlist) ^ (assign + testlist)))('expr_stmt')
+expr_stmt = (testlist + ZeroOrMore((augassign + testlist) ^ (assign + testlist)))('expr_stmt').setParseAction(actions.Argument)
 small_stmt = (expr_stmt ^ print_stmt ^ del_stmt ^ pass_stmt ^ flow_stmt \
 		^ import_stmt ^ global_stmt ^ assert_stmt)('small_stmt')#.setDebug().setName("small_stmt")
 simple_stmt << (delimitedList(small_stmt, delim=';') + Optional(SEMICOLON) + NEWLINE)#.setDebug().setName("simple statement")
