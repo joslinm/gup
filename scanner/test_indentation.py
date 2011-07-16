@@ -9,13 +9,14 @@ def checkIndent(s,l,t):
 	global currentIndent, indentLen
 	currentCol = col(l,s)
 	
+	if(currentCol == 1):
+		raise ParseException("Not an indent")
 	#If the column is greater than the previous line's column
-	if(currentCol > (currentIndent * indentLen)):
-	
+	elif(currentCol > (currentIndent * indentLen)):
 		#If there's no indentLen, this is the first indent
 		if(indentLen == 0):
 			indentLen = currentCol
-			currentIndent = 1
+			currentIndent += 1
 			
 		#This will run through the chain of VALID indents
 		#The elses indicate failed logic
@@ -29,18 +30,17 @@ def checkIndent(s,l,t):
 				else:
 					raise ParseFatalException("Too many additional indents")
 			else:
-				raise ParseFatalException("Alteration of initial indent length")
+				raise ParseException("Alteration of initial indent length")
 	else:
 		raise ParseException("Not an indent")
 
 def checkUndent(s,l,t):
 	global currentIndent, indentLen
 	currentCol = col(l,s)
-	print currentCol
-	
+
 	#If the column is less than the previous line's column
 	if(currentCol < (currentIndent * indentLen)):
-		if (currentCol == 0): #Check for 0 now to avoid divide by 0 below
+		if (currentCol == 1):
 			#We can drop current indent to 0, because of the following scenario:
 			'''
 			if x == y:
@@ -54,7 +54,8 @@ def checkUndent(s,l,t):
 			currentIndent = 0
 		else:
 			if(currentCol % indentLen == 0): #Valid length indent..
-				currentIndent = currentCol / indentLen
+				currentIndent = currentCol // indentLen
+				print currentIndent
 			else:
 				raise ParseException("Alteration of initial indent length in undent")
 	else:

@@ -234,9 +234,8 @@ parameters = (LPAREN + Optional(varargslist) + RPAREN)('parameters')
 simple_stmt = Forward()('simple_stmt')
 stmt = Forward()('stmt')
 suite = ((NEWLINE + INDENT + OneOrMore(stmt) + UNDENT) | simple_stmt)('suite')#.setDebug().setName("suite")
-#suite = Group( OneOrMore( empty + stmt.setParseAction( checkPeerIndent ) )  )
 if_stmt = (Group(_if + test + COLON) + suite + ZeroOrMore(Group(_elif + test + COLON) + suite) \
-		+ Optional(Group(_else + COLON) + suite))('if_stmt')#.setParseAction(actions.IfStatement).setDebug().setName("if statement")
+		+ Optional(Group(_else + COLON) + suite))('if_stmt').setParseAction(actions.IfStatement).setDebug().setName("if statement")
 for_stmt = (Group(_for + exprlist + _in + testlist + COLON) + suite \
 		+ Optional(_else + COLON + suite))('for_stmt').setParseAction(actions.ForStatement)
 while_stmt = (Group(_while + test + COLON) + suite + Optional(_else + COLON + suite))('while').setParseAction(actions.WhileStatement)
@@ -265,7 +264,7 @@ del_stmt = (_delete + exprlist)('del_stmt')
 print_stmt = (_print + Optional(delimitedList(test) + ENDCOMMA))('print_stmt')
 
 #Top level statements
-expr_stmt = (testlist + ZeroOrMore((augassign + testlist) ^ (assign + testlist)))('expr_stmt').setParseAction(actions.Expression)#.setDebug().setName('expression')
+expr_stmt = (testlist + ZeroOrMore((augassign + testlist) ^ (assign + testlist)))('expr_stmt')#.setParseAction(actions.Expression)#.setDebug().setName('expression')
 small_stmt = (expr_stmt ^ print_stmt ^ del_stmt ^ pass_stmt ^ flow_stmt \
 		^ import_stmt ^ global_stmt ^ assert_stmt)('small_stmt')#.setDebug().setName("small_stmt")
 simple_stmt << (small_stmt + ZeroOrMore(';' + small_stmt) \
@@ -275,4 +274,4 @@ compound_stmt = (if_stmt | while_stmt | for_stmt | funcdef | classdef | decorate
 stmt << (simple_stmt ^ compound_stmt).setName("stmt")#.setDebug().setName('stmt')
 
 #Top of our parser
-file_input = (ZeroOrMore(stmt | NEWLINE)).setDebug().setName("file_input")
+file_input = (ZeroOrMore(stmt | NEWLINE))#.setDebug().setName("file_input")
