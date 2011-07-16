@@ -72,11 +72,12 @@ STRING = (dblQuotedString | sglQuotedString)("STRING")
 NEWLINE = lineEnd.suppress()
 
 #Indentation
-TAB = White('\t')
-INDENT = OneOrMore(TAB).parseWithTabs().suppress()
-UNDENT = ZeroOrMore(TAB).parseWithTabs().suppress()
-INDENT.setParseAction(actions.checkIndent)
-UNDENT.setParseAction(actions.checkUndent)
+#TAB = White('\t')
+#INDENT = OneOrMore(TAB).parseWithTabs().setDebug().setName("indent")
+#UNDENT = ZeroOrMore(TAB).parseWithTabs()
+#INDENT.setParseAction(actions.checkIndent)
+#UNDENT.setParseAction(actions.checkUndent)
+from test_indentation import *
 
 #Comparisons
 greater = Literal('>')('greater')
@@ -233,8 +234,9 @@ parameters = (LPAREN + Optional(varargslist) + RPAREN)('parameters')
 simple_stmt = Forward()('simple_stmt')
 stmt = Forward()('stmt')
 suite = ((NEWLINE + INDENT + OneOrMore(stmt) + UNDENT) | simple_stmt)('suite')#.setDebug().setName("suite")
+#suite = Group( OneOrMore( empty + stmt.setParseAction( checkPeerIndent ) )  )
 if_stmt = (Group(_if + test + COLON) + suite + ZeroOrMore(Group(_elif + test + COLON) + suite) \
-		+ Optional(Group(_else + COLON) + suite))('if_stmt').setParseAction(actions.IfStatement)#.setDebug().setName("if statement")
+		+ Optional(Group(_else + COLON) + suite))('if_stmt')#.setParseAction(actions.IfStatement).setDebug().setName("if statement")
 for_stmt = (Group(_for + exprlist + _in + testlist + COLON) + suite \
 		+ Optional(_else + COLON + suite))('for_stmt').setParseAction(actions.ForStatement)
 while_stmt = (Group(_while + test + COLON) + suite + Optional(_else + COLON + suite))('while').setParseAction(actions.WhileStatement)
@@ -268,9 +270,9 @@ small_stmt = (expr_stmt ^ print_stmt ^ del_stmt ^ pass_stmt ^ flow_stmt \
 		^ import_stmt ^ global_stmt ^ assert_stmt)('small_stmt')#.setDebug().setName("small_stmt")
 simple_stmt << (small_stmt + ZeroOrMore(';' + small_stmt) \
 		+ Optional(SEMICOLON) + NEWLINE)#.setDebug().setName("simple statement")
-compound_stmt = (if_stmt ^ while_stmt ^ for_stmt ^ funcdef ^ classdef ^ decorated) \
+compound_stmt = (if_stmt | while_stmt | for_stmt | funcdef | classdef | decorated) \
 	('compound_stmt').setName("compound statement")#.setDebug()
 stmt << (simple_stmt ^ compound_stmt).setName("stmt")#.setDebug().setName('stmt')
 
 #Top of our parser
-file_input = (ZeroOrMore(stmt | NEWLINE)).parseWithTabs().setDebug().setName("file_input")
+file_input = (ZeroOrMore(stmt | NEWLINE)).setDebug().setName("file_input")

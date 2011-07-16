@@ -104,9 +104,11 @@ def file_input():
 	print tokens.dump()
 
 def indent():
-	data = "\t"
 	tokens = grammar.INDENT.parseString(data)
 	print tokens.dump()
+	tokens = grammar.UNDENT.parseString("")
+	print tokens.dump()
+	
 
 def general_test():
 	import os
@@ -136,6 +138,8 @@ def test_files(file=None):
 #trailer()
 #expr()
 #stmt()
+#indent()
+
 
 import sys
 for arg in sys.argv[1:]:

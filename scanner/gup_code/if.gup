@@ -1,5 +1,5 @@
 if x <= 5:
-	print "what'd you do with 5?"
+    print "what'd you do with 5?"
 	x = 5 - 4
 else:
 	print "say hi"
