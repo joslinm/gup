@@ -99,7 +99,7 @@ def stmt():
 def file_input():
 	data = '''x == 5:
 	\tx*5'''
-	tokens = grammar.file_input.parseFile("code_test.gup")
+	tokens = grammar.file_input.parseFile(os.normcase("/code_test.gup"))
 	
 	print tokens.dump()
 
@@ -108,6 +108,28 @@ def indent():
 	tokens = grammar.INDENT.parseString(data)
 	print tokens.dump()
 
+def general_test():
+	import os
+	cdir = os.getcwd()
+	os.chdir(os.path.normcase(cdir + '/gup_code'))
+	tokens = grammar.file_input.parseFile("general.gup")
+	
+def test_files(file=None):
+	import os
+	cdir = os.getcwd()
+	os.chdir(os.path.normcase(cdir + '/gup_code'))
+	if file:
+		tokens = grammar.file_input.parseFile(file)
+		print tokens.asList()
+	else:
+		files = ['if.gup', 'for.gup', 'while.gup', 'functions.gup',
+			'kernel_functions.gup']
+		
+		for file in files:
+			tokens = grammar.file_input.parseFile(file)
+			
+	os.chdir(cdir)
+
 #basics()
 #factor()
 #power()
@@ -115,6 +137,9 @@ def indent():
 #expr()
 #stmt()
 
-stmt()
-
-
+import sys
+for arg in sys.argv[1:]:
+	if arg == '-f':
+		test_files()
+	else:
+		test_files(arg + '.gup')

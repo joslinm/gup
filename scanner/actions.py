@@ -19,7 +19,8 @@ def checkIndent(t):
 
 def checkUndent(t):
 	global indent
-	if len(t) > 0:
+	
+	if indent > 0:
 		tabs = t[0]
 		tabs_l = tabs.split('\t')
 		new_indent = len(tabs_l) - 1
@@ -55,10 +56,10 @@ class FunctionDeclaration(object):
 		pprint.pprint(t.asList())
 	def __str__(self):
 		return self.arg.asXML()
-class Argument(object):
+class Expression(object):
 	def __init__(self, t):
 		self.arg = t
-		pprint.pprint(t.asList())
+		#pprint.pprint(t.asList())
 class Test(object):
 	def __init__(self,t):
 		self.arg = t

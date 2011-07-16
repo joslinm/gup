@@ -1,0 +1,6 @@
+for x in range(10):
+	print "sup"
+	print x * 5 * 1 / 5
+
+for x in y:
+	print x

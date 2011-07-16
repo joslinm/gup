@@ -19,6 +19,7 @@ TODO
 - Organize into categories / sections 		[x]
 - Name them into groups 					[ ]
 - Hook up parse actions 					[ ]
+- Match names with _						[ ]
 
 XXX
 - Using suppress on comma results in unknown    [x]
@@ -42,21 +43,10 @@ XXX
 	__Resolution__
 	works now 
 
-- Does not match names with _					[ ]
+- `suite` is unable to match consecutive		[ ]
+	lines in a row
 '''
 
-### SAFE (and slow)
-### Uses ^ instead of | for OR expressions:
-'''
-One issue to be aware of is that '|' is an eager matcher, not a greedy one;
-that is, it will match the first successful match, and not evaluate all options
-and choose the longest one. In a construct such as this:
-OneOrMore(libraryDef | useDef | architectureDef | entityDef | 
-          packageBodyDef | packageDef | configurationDeclarationDef)
-you must be careful that an early expression might mask a later one in the list.
-To work around this, replace the '|'s with '^'s - you'll take a hit in parsing speed
-but this may help you identify some subtle issues in your grammar.
-'''
 
 ParserElement.setDefaultWhitespaceChars(" ")
 #------------------------------------------------#
@@ -78,7 +68,7 @@ COMMENT = Suppress(pythonStyleComment)
 #Basics
 NAME = Word(alphas)("NAME")
 NUM = (Word(nums) + Optional(DOT + Word(nums)))("NUM")
-STRING = (dblQuotedString ^ sglQuotedString)("STRING")
+STRING = (dblQuotedString | sglQuotedString)("STRING")
 NEWLINE = lineEnd.suppress()
 
 #Indentation
@@ -242,13 +232,13 @@ parameters = (LPAREN + Optional(varargslist) + RPAREN)('parameters')
 #Block statements [depends on #Top Level Statements] => *Forwards simple_stmt & stmt
 simple_stmt = Forward()('simple_stmt')
 stmt = Forward()('stmt')
-suite = Group((simple_stmt ^ (NEWLINE + INDENT + OneOrMore(stmt) + UNDENT)))('suite')#.setDebug().setName("suite")
-if_stmt = (_if + test + COLON + suite + ZeroOrMore(_elif + test + COLON + suite) \
-		+ Optional(_else + COLON + suite))('if_stmt').setParseAction(actions.IfStatement)#.setDebug().setName("if statement")
-for_stmt = (_for + exprlist + _in + testlist + COLON + suite \
+suite = ((NEWLINE + INDENT + OneOrMore(stmt) + UNDENT) | simple_stmt)('suite')#.setDebug().setName("suite")
+if_stmt = (Group(_if + test + COLON) + suite + ZeroOrMore(Group(_elif + test + COLON) + suite) \
+		+ Optional(Group(_else + COLON) + suite))('if_stmt').setParseAction(actions.IfStatement)#.setDebug().setName("if statement")
+for_stmt = (Group(_for + exprlist + _in + testlist + COLON) + suite \
 		+ Optional(_else + COLON + suite))('for_stmt').setParseAction(actions.ForStatement)
-while_stmt = (_while + test + COLON + suite + Optional(_else + COLON + suite))('while').setParseAction(actions.WhileStatement)
-funcdef = (_def + NAME + parameters + COLON + suite)('funcdef').setParseAction(actions.FunctionDeclaration)
+while_stmt = (Group(_while + test + COLON) + suite + Optional(_else + COLON + suite))('while').setParseAction(actions.WhileStatement)
+funcdef = (Group(_def + NAME + parameters + COLON)('DefiningLine') + suite)('funcdef').setParseAction(actions.FunctionDeclaration)
 return_stmt = (_return + Optional(testlist))('return_stmt')
 
 #Block flow control statments
@@ -273,13 +263,14 @@ del_stmt = (_delete + exprlist)('del_stmt')
 print_stmt = (_print + Optional(delimitedList(test) + ENDCOMMA))('print_stmt')
 
 #Top level statements
-expr_stmt = (testlist + ZeroOrMore((augassign + testlist) ^ (assign + testlist)))('expr_stmt').setParseAction(actions.Argument)
+expr_stmt = (testlist + ZeroOrMore((augassign + testlist) ^ (assign + testlist)))('expr_stmt').setParseAction(actions.Expression)#.setDebug().setName('expression')
 small_stmt = (expr_stmt ^ print_stmt ^ del_stmt ^ pass_stmt ^ flow_stmt \
 		^ import_stmt ^ global_stmt ^ assert_stmt)('small_stmt')#.setDebug().setName("small_stmt")
-simple_stmt << (delimitedList(small_stmt, delim=';') + Optional(SEMICOLON) + NEWLINE)#.setDebug().setName("simple statement")
+simple_stmt << (small_stmt + ZeroOrMore(';' + small_stmt) \
+		+ Optional(SEMICOLON) + NEWLINE)#.setDebug().setName("simple statement")
 compound_stmt = (if_stmt ^ while_stmt ^ for_stmt ^ funcdef ^ classdef ^ decorated) \
 	('compound_stmt').setName("compound statement")#.setDebug()
-stmt << (simple_stmt ^ compound_stmt).setName("stmt")#.setDebug()
+stmt << (simple_stmt ^ compound_stmt).setName("stmt")#.setDebug().setName('stmt')
 
 #Top of our parser
-file_input = (ZeroOrMore(stmt | NEWLINE)).parseWithTabs()
+file_input = (ZeroOrMore(stmt | NEWLINE)).parseWithTabs().setDebug().setName("file_input")
