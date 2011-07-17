@@ -32,7 +32,14 @@ def checkIndent(s,l,t):
 symbol_table = []
 
 #CLASS OBJECTS
-class IfStatement(object):
+class Statement(object):
+	def __init__(self,t):
+		global indentLevel
+		self.indentLevel = indentLevel
+	def __str__(self):
+		return " ".join(t)
+		
+class IfStatement(Statement):
 	def __init__(self,t):
 		self.arg = t
 		pprint.pprint(t.asList())
