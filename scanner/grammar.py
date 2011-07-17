@@ -48,7 +48,7 @@ XXX
 '''
 
 
-ParserElement.setDefaultWhitespaceChars(" ")
+ParserElement.setDefaultWhitespaceChars(" \n")
 #------------------------------------------------#
 # E L E M E N T S
 #------------------------------------------------#
@@ -69,7 +69,7 @@ COMMENT = Suppress(pythonStyleComment)
 NAME = Word(alphas)("NAME")
 NUM = (Word(nums) + Optional(DOT + Word(nums)))("NUM")
 STRING = (dblQuotedString | sglQuotedString)("STRING")
-NEWLINE = lineEnd.suppress()
+NEWLINE = ZeroOrMore(lineEnd + Optional(lineEnd)).suppress()
 
 #Indentation
 #TAB = White('\t')
@@ -276,4 +276,4 @@ compound_stmt = (if_stmt | while_stmt | for_stmt | funcdef | classdef | decorate
 stmt << (simple_stmt ^ compound_stmt).setName("stmt").setDebug().setName('stmt')
 
 #Top of our parser
-file_input = (ZeroOrMore(stmt | NEWLINE))#.setDebug().setName("file_input")
+file_input = (ZeroOrMore(stmt) + ZeroOrMore(lineEnd)).setDebug().setName("file_input")

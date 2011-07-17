@@ -11,3 +11,8 @@ else:
 		print 'hi!'
 	else:
 		print "hi!'
+
+if True:
+	print "Stay true."
+else:
+	print "..."
