@@ -77,7 +77,8 @@ NEWLINE = lineEnd.suppress()
 #UNDENT = ZeroOrMore(TAB).parseWithTabs()
 #INDENT.setParseAction(actions.checkIndent)
 #UNDENT.setParseAction(actions.checkUndent)
-from test_indentation import *
+#from test_indentation import *
+INDENT = lineEnd.suppress() + empty + empty.copy().setParseAction(actions.checkIndent).setDebug().setName('indent')
 
 #Comparisons
 greater = Literal('>')('greater')

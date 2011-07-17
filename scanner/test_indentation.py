@@ -1,31 +1,29 @@
 from pyparsing import *
-
 indentStack = [1]
+indentLevel = 0
 
 def checkIndent(s,l,t):
-	global indentStack
+	#Grab current column
 	currentCol = col(l,s)
 	print currentCol
 	
+	#The indent stack.. 
+	global indentStack, indentLevel
+	while(currentCol < indentStack[-1]):
+		indentLevel -= 1
+		indentStack.pop()
+	#..revives itself after death
+	if(not indentStack):
+		indentStack = []
+		indentLevel = 0
+		
 	#If the column is greater than the previous line's column
 	if(currentCol > indentStack[-1]):
 		indentStack.append(currentCol)
+		indentLevel += 1
 	else:
 		raise ParseException(s,l,"Not an indent")
-		
-	#TEST#
-	#
 
-def checkUndent(s,l,t):
-	global indentStack
-	currentCol = col(l,s)
-	
-	#If the column is less than the previous line's column
-	if( not (indentStack and currentCol < indentStack[-1] and currentCol <= indentStack[-2]) ):
-		raise ParseException(s,l,"not an undent")
-	else:
-		indentStack.pop()
 
 INDENT = lineEnd.suppress() + empty + empty.copy().setParseAction(checkIndent).setDebug().setName('indent')
-UNDENT = FollowedBy(empty).setParseAction(checkUndent).setDebug().setName("UNDENT")
 

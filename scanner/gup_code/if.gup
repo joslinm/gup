@@ -3,3 +3,11 @@ if x <= 5:
 	x = 5 - 4
 else:
 	print "say hi"
+	if x > 2:
+		print "hi!"
+	elif  x > 3:
+		print "hi!"
+	elif x > 4:
+		print 'hi!'
+	else:
+		print "hi!'
