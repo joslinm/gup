@@ -1,66 +1,31 @@
 from pyparsing import *
 
-#indentLen * currentIndent = starting column
-#e.g. 4 * 2 = 8
-indentLen = 0
-currentIndent = 0
+indentStack = [1]
 
 def checkIndent(s,l,t):
-	global currentIndent, indentLen
+	global indentStack
 	currentCol = col(l,s)
+	print currentCol
 	
-	if(currentCol == 1):
-		raise ParseException("Not an indent")
 	#If the column is greater than the previous line's column
-	elif(currentCol > (currentIndent * indentLen)):
-		#If there's no indentLen, this is the first indent
-		if(indentLen == 0):
-			indentLen = currentCol
-			currentIndent += 1
-			
-		#This will run through the chain of VALID indents
-		#The elses indicate failed logic
-		else: 
-			#If it's a valid length indent..
-			if (currentCol % indentLen == 0):
-				#If it is one more indent..
-				if(currentCol / indentLen == (currentIndent + 1)):
-					#Then it's a valid indentation
-					currentIndent += 1
-				else:
-					raise ParseFatalException("Too many additional indents")
-			else:
-				raise ParseException("Alteration of initial indent length")
+	if(currentCol > indentStack[-1]):
+		indentStack.append(currentCol)
 	else:
-		raise ParseException("Not an indent")
+		raise ParseException(s,l,"Not an indent")
+		
+	#TEST#
+	#
 
 def checkUndent(s,l,t):
-	global currentIndent, indentLen
+	global indentStack
 	currentCol = col(l,s)
-
+	
 	#If the column is less than the previous line's column
-	if(currentCol < (currentIndent * indentLen)):
-		if (currentCol == 1):
-			#We can drop current indent to 0, because of the following scenario:
-			'''
-			if x == y:
-				for x in y:
-					if x > y:
-						print 'hello world'
-			else:
-				print 'hello'
-			'''
-			#But this also means that it requires additional checking elsewhere
-			currentIndent = 0
-		else:
-			if(currentCol % indentLen == 0): #Valid length indent..
-				currentIndent = currentCol // indentLen
-				print currentIndent
-			else:
-				raise ParseException("Alteration of initial indent length in undent")
+	if( not (indentStack and currentCol < indentStack[-1] and currentCol <= indentStack[-2]) ):
+		raise ParseException(s,l,"not an undent")
 	else:
-		raise ParseException("Not an undent")
+		indentStack.pop()
 
-INDENT = empty.setParseAction(checkIndent).setDebug().setName('indent')
+INDENT = lineEnd.suppress() + empty + empty.copy().setParseAction(checkIndent).setDebug().setName('indent')
 UNDENT = FollowedBy(empty).setParseAction(checkUndent).setDebug().setName("UNDENT")
 
