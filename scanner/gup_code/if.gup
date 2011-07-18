@@ -5,7 +5,7 @@ else:
 	print "say hi"
 	if x > 2:
 		print "hi!"
-	elif  x > 3:
+	else if  x > 3:
 		print "hi!"
 	elif x > 4:
 		print 'hi!'

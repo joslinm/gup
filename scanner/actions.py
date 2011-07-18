@@ -1,5 +1,19 @@
 from pyparsing import *
 import pprint
+'''
+-----
+GUP.scanner.actions
+Definition of parse actions on grammar including classes
+-----
+NOTES
+- Indentation is handled here and every stmt is given an indent level
+
+TODO
+- Create class hierarchy			 		[ ]
+- Make parse action to catch wrong undents	[ ]
+- Create a translation dict	& make it		[ ]
+	so that every Keyword() is in there
+'''
 
 #INDENTATION
 indentStack = [1]
@@ -10,15 +24,11 @@ def checkIndent(s,l,t):
 	currentCol = col(l,s)
 	print currentCol
 	
-	#The indent stack.. 
+	#The indent stack & indent level
 	global indentStack, indentLevel
-	while(currentCol < indentStack[-1]):
+	while(currentCol < indentStack[-1] and len(indentStack) > 1):
 		indentLevel -= 1
 		indentStack.pop()
-	#..revives itself after death
-	if(not indentStack):
-		indentStack = []
-		indentLevel = 0
 		
 	#If the column is greater than the previous line's column
 	if(currentCol > indentStack[-1]):
@@ -39,10 +49,19 @@ class Statement(object):
 	def __str__(self):
 		return " ".join(t)
 		
+class SmallStatement(Statement):
+	def __init__(self,t):
+		pprint.pprint(t.asList())
+		print "indent level = %s" % (indentLevel) 
+
+class Suite(Statement):
+	def __init__(self,t):
+		print pprint.pprint("suite = %s" % t.asList())
+
 class IfStatement(Statement):
 	def __init__(self,t):
 		self.arg = t
-		pprint.pprint(t.asList())
+		#pprint.pprint(t.asList())
 	def __str__(self):
 		return self.arg.asXML()
 
