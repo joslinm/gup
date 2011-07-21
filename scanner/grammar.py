@@ -212,7 +212,7 @@ simple_stmt = Forward()('simple_stmt')
 stmt = Forward()('stmt')
 suite = ((INDENT + OneOrMore(stmt)) | simple_stmt)('suite')#.setDebug().setName('suite')
 #suite = ((NEWLINE + INDENT + OneOrMore(stmt) + UNDENT) | simple_stmt)('suite')#.setDebug().setName("suite")
-if_stmt = (Group(_if + test + COLON + suite) + ZeroOrMore(Group(_elif + test + COLON) + suite) \
+if_stmt = (Group(_if + test + COLON) + suite + ZeroOrMore(Group(_elif + test + COLON) + suite) \
 		+ Optional(Group(_else + COLON) + suite))('if_stmt').setParseAction(actions.IfStatement)
 		#.setDebug().setName("if statement")
 for_stmt = (Group(_for + exprlist + _in + testlist + COLON) + suite \
