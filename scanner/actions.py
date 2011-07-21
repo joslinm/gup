@@ -41,52 +41,76 @@ def checkIndent(s,l,t):
 #SYMBOL TABLE
 symbol_table = []
 
-#CLASS OBJECTS
+'''Class Structure
+
+					[stmt]
+		[smpl_stmt]  --|--	[cmpd_stmt]
+	{expr,print,del..}	| {if,while,for,..}
+		...				|	[suite]
+						-------|
+'''
+
 class Statement(object):
 	def __init__(self,t):
 		global indentLevel
 		self.indentLevel = indentLevel
 	def __str__(self):
 		return " ".join(t)
+
+class SimpleStatement(Statement):
+	def __init__(self,t):
+		pprint.pprint(t.asList())
+		print "indent level = %s" % (indentLevel)
+	def __str__(self):
+		return " ".join(t)
 		
-class SmallStatement(Statement):
+class CompoundStatement(Statement):
+	def __init__(self,t):
+		pprint.pprint(t.asList())
+		print "indent level = %s" % (indentLevel)
+	def __str__(self):
+		return " ".join(t)
+
+class SmallStatement(SimpleStatement):
 	def __init__(self,t):
 		pprint.pprint(t.asList())
 		print "indent level = %s" % (indentLevel) 
 
-class Suite(Statement):
+class Suite(CompoundStatement):
 	def __init__(self,t):
 		print pprint.pprint("suite = %s" % t.asList())
 
-class IfStatement(Statement):
+class IfStatement(CompoundStatement):
 	def __init__(self,t):
 		self.arg = t
-		#pprint.pprint(t.asList())
+		pprint.pprint(t.asList())
 	def __str__(self):
 		return self.arg.asXML()
 
-class ForStatement(object):
+class ForStatement(CompoundStatement):
 	def __init__(self,t):
 		self.arg = t
 		pprint.pprint(t.asList())
 	def __str__(self):
 		return self.arg.asXML()
-class WhileStatement(object):
+class WhileStatement(CompoundStatement):
 	def __init__(self,t):
 		self.arg = t
 		pprint.pprint(t.asList())
 	def __str__(self):
 		return self.arg.asXML()
-class FunctionDeclaration(object):
+class FunctionDeclaration(CompoundStatement):
 	def __init__(self,t):
 		self.arg = t
 		pprint.pprint(t.asList())
 	def __str__(self):
 		return self.arg.asXML()
-class Expression(object):
+
+class Expression(SmallStatement):
 	def __init__(self, t):
 		self.arg = t
 		#pprint.pprint(t.asList())
+		
 class Test(object):
 	def __init__(self,t):
 		self.arg = t
