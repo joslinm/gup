@@ -48,13 +48,10 @@ STRING = (dblQuotedString | sglQuotedString)("STRING")
 NEWLINE = lineEnd.suppress()
 
 #Indentation
-#TAB = White('\t')
-#INDENT = OneOrMore(TAB).parseWithTabs().setDebug().setName("indent")
-#UNDENT = ZeroOrMore(TAB).parseWithTabs()
-#INDENT.setParseAction(actions.checkIndent)
-#UNDENT.setParseAction(actions.checkUndent)
-#from test_indentation import *
 INDENT = lineEnd.suppress() + empty + empty.copy().setParseAction(actions.checkIndent).setDebug().setName('indent')
+#INDENT = lineStart.setParseAction(actions.checkIndent).setDebug().setName('indent')
+#UNDENT = empty + empty.copy().setParseAction(actions.checkUndent).setDebug().setName('undent')
+#SAME_DENT = lineEnd.suppress() + empty + empty.copy().setParseAction(actions.checkSamedent).setDebug().setName('samedent')
 
 #Comparisons
 greater = Literal('>')('greater')
@@ -137,7 +134,7 @@ import_stmt = import_name('import_stmt')
 
 #Test & atom node are two building blocks of many grammars
 #[depends on #Comparison nodes] => *Forwards test
-test = Forward()('test').setParseAction(actions.Test)
+test = Forward()('test')#.setParseAction(actions.Test)
 testlist_comp = Forward()('testlist_comp')
 testlist1 = Forward()('testlist1')
 atom = ((LPAREN + testlist_comp + RPAREN) \
@@ -167,7 +164,7 @@ not_test = Forward()('not_test')
 not_test << ((_not +  not_test) ^ comparison)#.setDebug().setName("test")
 and_test = (not_test + ZeroOrMore(_and + not_test))('and_test')
 or_test = (and_test + ZeroOrMore(_or + and_test))('or_test')
-test << Group(or_test + Optional(_if + or_test + _else + test))('test')
+test << Group(or_test + Optional(_if + or_test + _else + test))('test').setDebug().setName('test')
 comp_iter = Forward()('comp_iter')
 comp_for = (_for + exprlist + _in + or_test + Optional(comp_iter))('comp_for')
 comp_if = (_if + test + Optional(comp_iter))('comp_if')
@@ -210,11 +207,11 @@ parameters = (LPAREN + Optional(varargslist) + RPAREN)('parameters')
 #Block statements [depends on #Top Level Statements] => *Forwards simple_stmt & stmt
 simple_stmt = Forward()('simple_stmt')
 stmt = Forward()('stmt')
-suite = ((INDENT + OneOrMore(stmt)) | simple_stmt)('suite')#.setDebug().setName('suite')
+suite = ((INDENT + OneOrMore(stmt).setDebug().setName('insidestmt') ).setDebug().setName('YYY') | simple_stmt )('suite').setDebug().setName('suite')
 #suite = ((NEWLINE + INDENT + OneOrMore(stmt) + UNDENT) | simple_stmt)('suite')#.setDebug().setName("suite")
 if_stmt = (Group(_if + test + COLON) + suite + ZeroOrMore(Group(_elif + test + COLON) + suite) \
-		+ Optional(Group(_else + COLON) + suite))('if_stmt').setParseAction(actions.IfStatement)
-		#.setDebug().setName("if statement")
+		+ Optional(Group(_else + COLON) + suite))('if_stmt').setParseAction(actions.IfStatement) \
+		.setDebug().setName("if statement")
 for_stmt = (Group(_for + exprlist + _in + testlist + COLON) + suite \
 		+ Optional(_else + COLON + suite))('for_stmt').setParseAction(actions.ForStatement)
 while_stmt = (Group(_while + test + COLON) + suite + Optional(_else + COLON + suite))('while').setParseAction(actions.WhileStatement)
@@ -249,8 +246,8 @@ small_stmt = (expr_stmt ^ print_stmt ^ del_stmt ^ pass_stmt ^ flow_stmt \
 simple_stmt << (small_stmt + ZeroOrMore(';' + small_stmt) \
 		+ Optional(SEMICOLON) + NEWLINE)#.setDebug().setName("simple statement")
 compound_stmt = (if_stmt | while_stmt | for_stmt | funcdef | classdef | decorated) \
-	('compound_stmt').setName("compound statement")#.setDebug()
-stmt << (simple_stmt ^ compound_stmt).setName("stmt").setDebug().setName('stmt')
+	('compound_stmt').setName("compound statement").setDebug()
+stmt <<  (simple_stmt ^ compound_stmt).setParseAction('checkSamedent').setName("stmt").setDebug().setName('stmt')
 
 #Top of our parser
 file_input = ZeroOrMore(stmt | NEWLINE)#.setDebug().setName("file_input")

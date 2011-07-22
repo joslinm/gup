@@ -123,6 +123,8 @@ def test_files(file=None):
 	if file:
 		tokens = grammar.file_input.parseFile(file)
 		print tokens.asList()
+		import pprint
+		pprint.pprint(str(tokens[0]))
 	else:
 		files = ['if.gup', 'for.gup', 'while.gup', 'functions.gup',
 			'kernel_functions.gup']
