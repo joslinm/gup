@@ -24,7 +24,7 @@ XXX
 '''
 
 
-ParserElement.setDefaultWhitespaceChars(" \n")
+ParserElement.setDefaultWhitespaceChars(" \t")
 #------------------------------------------------#
 # E L E M E N T S
 #------------------------------------------------#
@@ -50,7 +50,7 @@ NEWLINE = lineEnd.suppress()
 #Indentation
 INDENT = lineEnd.suppress() + empty + empty.copy().setParseAction(actions.checkIndent).setDebug().setName('indent')
 #INDENT = lineStart.setParseAction(actions.checkIndent).setDebug().setName('indent')
-#UNDENT = empty + empty.copy().setParseAction(actions.checkUndent).setDebug().setName('undent')
+#UNDENT = empty.copy().setParseAction(actions.checkUndent).setDebug().setName('undent')
 #SAME_DENT = lineEnd.suppress() + empty + empty.copy().setParseAction(actions.checkSamedent).setDebug().setName('samedent')
 
 #Comparisons
@@ -153,15 +153,15 @@ shift_expr = (arith_expr + ZeroOrMore((shiftLeft ^ shiftRight) + arith_expr)) \
 	('shift_expr')
 and_expr = (shift_expr + ZeroOrMore(bitwiseAnd + shift_expr))('and_expr')
 xor_expr = (and_expr + ZeroOrMore(complement + and_expr))('xor_expr')
-expr = (xor_expr + ZeroOrMore(bitwiseOr + xor_expr))('expr')
+expr = (xor_expr + ZeroOrMore(bitwiseOr + xor_expr))('expr').setDebug().setName('EXPR')
 exprlist = (delimitedList(expr) + ENDCOMMA)('exprlist')
 
 #Comparison nodes
 comp_op = (greater^lesser^greaterOrEqual^lesserOrEqual^equal^notequal^_is^_in^_not \
           ^ _not + _in ^ _is + _not)('comp_op')
-comparison = (expr + ZeroOrMore(comp_op + expr))('comparison')
+comparison = (expr + ZeroOrMore(comp_op + expr))('comparison').setDebug().setName('COMPARISON')
 not_test = Forward()('not_test')
-not_test << ((_not +  not_test) ^ comparison)#.setDebug().setName("test")
+not_test << ((_not +  not_test) ^ comparison).setDebug().setName("teasdfst")
 and_test = (not_test + ZeroOrMore(_and + not_test))('and_test')
 or_test = (and_test + ZeroOrMore(_or + and_test))('or_test')
 test << Group(or_test + Optional(_if + or_test + _else + test))('test').setDebug().setName('test')
@@ -207,10 +207,14 @@ parameters = (LPAREN + Optional(varargslist) + RPAREN)('parameters')
 #Block statements [depends on #Top Level Statements] => *Forwards simple_stmt & stmt
 simple_stmt = Forward()('simple_stmt')
 stmt = Forward()('stmt')
-suite = ((INDENT + OneOrMore(stmt).setDebug().setName('insidestmt') ).setDebug().setName('YYY') | simple_stmt )('suite').setDebug().setName('suite')
+suite_stmt = Forward()('suite_stmt')
+indentst = [1]
+suite = indentedBlock(suite_stmt, indentst)#.setParseAction(actions.Suite)
+suite.setDebug().setName('indent blocked')
+#suite = ((INDENT + OneOrMore(suite_stmt)) ^ simple_stmt )('suite').setDebug().setName('suite')
 #suite = ((NEWLINE + INDENT + OneOrMore(stmt) + UNDENT) | simple_stmt)('suite')#.setDebug().setName("suite")
-if_stmt = (Group(_if + test + COLON) + suite + ZeroOrMore(Group(_elif + test + COLON) + suite) \
-		+ Optional(Group(_else + COLON) + suite))('if_stmt').setParseAction(actions.IfStatement) \
+if_stmt = ((Group(Group(_if + test + COLON + lineEnd) + suite + ZeroOrMore(Group(_elif + test + COLON) + suite) \
+		+ Optional(Group(_else + COLON) + suite)))('if_stmt')).setParseAction(actions.IfStatement) \
 		.setDebug().setName("if statement")
 for_stmt = (Group(_for + exprlist + _in + testlist + COLON) + suite \
 		+ Optional(_else + COLON + suite))('for_stmt').setParseAction(actions.ForStatement)
@@ -241,13 +245,15 @@ print_stmt = (_print + Optional(delimitedList(test) + ENDCOMMA))('print_stmt')
 
 #Top level statements
 expr_stmt = (testlist + ZeroOrMore((augassign + testlist) ^ (assign + testlist)))('expr_stmt').setParseAction(actions.Expression)#.setDebug().setName('expression')
-small_stmt = (expr_stmt ^ print_stmt ^ del_stmt ^ pass_stmt ^ flow_stmt \
+small_stmt = (expr_stmt ^ print_stmt.setDebug().setName('PRINT') ^ del_stmt ^ pass_stmt ^ flow_stmt \
 		^ import_stmt ^ global_stmt ^ assert_stmt)('small_stmt').setDebug().setName("small_stmt").setParseAction(actions.SmallStatement)
 simple_stmt << (small_stmt + ZeroOrMore(';' + small_stmt) \
 		+ Optional(SEMICOLON) + NEWLINE)#.setDebug().setName("simple statement")
 compound_stmt = (if_stmt | while_stmt | for_stmt | funcdef | classdef | decorated) \
 	('compound_stmt').setName("compound statement").setDebug()
-stmt <<  (simple_stmt ^ compound_stmt).setParseAction('checkSamedent').setName("stmt").setDebug().setName('stmt')
+
+suite_stmt << (small_stmt ^ compound_stmt)#.setParseAction(actions.checkSamedent)
+stmt << (simple_stmt ^ compound_stmt)#.setParseAction(actions.checkSamedent).setName("stmt").setDebug()
 
 #Top of our parser
 file_input = ZeroOrMore(stmt | NEWLINE)#.setDebug().setName("file_input")

@@ -114,9 +114,9 @@ class Suite(CompoundStatement):
 	def __init__(self,t):
 		self.arg = t
 		pprint.pprint("suite = %s" % t.asList())
-		
 	def __str__(self):
-		return pprint.pformat(self.arg.asList())
+		for t in self.arg.asList():
+			return pprint.pformat(t.asList())
 
 class IfStatement(CompoundStatement):
 	def __init__(self,t):
@@ -130,7 +130,8 @@ class ForStatement(CompoundStatement):
 		self.arg = t
 		pprint.pprint(t.asList())
 	def __str__(self):
-		return pprint.pformat(self.arg.asList())
+		for t in self.arg.asList():
+			return pprint.pformat(t.asList())
 class WhileStatement(CompoundStatement):
 	def __init__(self,t):
 		self.arg = t
