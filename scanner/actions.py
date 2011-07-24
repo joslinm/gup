@@ -69,7 +69,10 @@ def checkReservedWords(s,l,t):
 	print "ATOM CHECKING.." + t[0]
 	if t[0] in reserves:
 		raise ParseException(s,l,"Part of reserved words")
-	
+def getCol(s,l,t):
+		print l
+		print col(l,s)
+		print s	
 #SYMBOL TABLE
 symbol_table = []
 INDENT = lineStart.setParseAction(checkIndent).setDebug().setName('indent')

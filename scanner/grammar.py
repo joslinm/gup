@@ -24,7 +24,7 @@ XXX
 '''
 
 
-#ParserElement.setDefaultWhitespaceChars(" \t")
+ParserElement.setDefaultWhitespaceChars(" \t")
 #------------------------------------------------#
 # E L E M E N T S
 #------------------------------------------------#
@@ -45,7 +45,7 @@ COMMENT = Suppress(pythonStyleComment)
 NAME = Word(alphas)("NAME")
 NUM = (Word(nums) + Optional(DOT + Word(nums)))("NUM")
 STRING = (dblQuotedString | sglQuotedString)("STRING")
-NEWLINE = lineEnd.suppress()
+NEWLINE = lineEnd.suppress().setParseAction(actions.getCol)
 
 #Indentation
 #INDENT = lineEnd.suppress() + empty + empty.copy().setParseAction(actions.checkIndent).setDebug().setName('indent')
@@ -212,8 +212,8 @@ simple_stmt = Forward()('simple_stmt')
 stmt = Forward()('stmt')
 suite_stmt = Forward()('suite_stmt')
 indentst = [1]
-suite = indentedBlock(suite_stmt, indentst)#.setParseAction(actions.Suite)
-suite.setDebug().setName('indent blocked')
+suite = indentedBlock(suite_stmt, indentst, actions.getCol)#.setParseAction(actions.Suite)
+suite.setDebug().setName('suite')
 #suite = ((INDENT + OneOrMore(suite_stmt)) ^ simple_stmt )('suite').setDebug().setName('suite')
 #suite = ((NEWLINE + INDENT + OneOrMore(stmt) + UNDENT) | simple_stmt)('suite')#.setDebug().setName("suite")
 if_stmt = ((Group(Group(_if + test + COLON) + suite + ZeroOrMore(Group(_elif + test + COLON) + suite) \
@@ -259,4 +259,4 @@ suite_stmt << (small_stmt ^ compound_stmt)#.setParseAction(actions.checkSamedent
 stmt << (simple_stmt ^ compound_stmt)#.setParseAction(actions.checkSamedent).setName("stmt").setDebug()
 
 #Top of our parser
-file_input = ZeroOrMore(stmt | NEWLINE)#.setDebug().setName("file_input")
+file_input = ZeroOrMore(stmt | NEWLINE).parseWithTabs()#.setDebug().setName("file_input")
