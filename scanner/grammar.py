@@ -122,8 +122,23 @@ bitwiseOr = Literal('|')('bitwiseOr')
 bitwiseXor = Literal('^')('bitwiseXor')
 complement = Literal('~')('complement')
 
-#Reserves
-reserves = _while | _if | _elif | _else | _for | _continue | _pass | _def | _class
+#Reserved words
+reserves = ( \
+	#Flow Control
+	_if | _in | _not | _is | _and | _or | _while | _if | _else | _elif | _for | _continue
+	#Utility keywords
+	| KERNELDEC | _def | _class | _lambda | _delete | _print | _global | _import | _as
+	| _assert | _return
+	#Assignments
+	| assign | plusAssign | minusAssign | multAssign | divAssign | modAssign
+	| bitwiseAndAssign | bitwiseOrAssign | bitwiseComplementAssign
+	| shiftLeftAssign | shiftRightAssign | powerAssign | floorDivAssign
+	#Math
+	| mult | power | div | divFloor | mod | plus | minus
+	#Bitwise Operations
+	| shiftLeft | shiftRight | bitwiseAnd | bitwiseOr | bitwiseXor
+	| complement
+)
 
 ParserElement.setDefaultWhitespaceChars(" \t")
 #------------------------------------------------#
@@ -140,9 +155,9 @@ import_stmt = import_name('import_stmt')
 test = Forward()('test')#.setParseAction(actions.Test)
 testlist_comp = Forward()('testlist_comp')
 testlist1 = Forward()('testlist1')
-atom = NotAny(reserves) + ((LPAREN + testlist_comp + RPAREN) \
-       ^ (TICK + testlist1 + TICK) \
-       ^ (NAME | NUM | OneOrMore(STRING)))('atom').setParseAction(actions.checkReservedWords)
+atom = ((LPAREN + testlist_comp + RPAREN) \
+       ^ (TICK + testlist1 + TICK)
+       ^ (( (NotAny(reserves) + NAME) | NUM | OneOrMore(STRING))))('atom').setParseAction(actions.checkReservedWords)
 	   
 #Expr node is a building block of many grammars
 #[depends on #Argument Lists] => *Forwards trailer
