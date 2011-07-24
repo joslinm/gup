@@ -212,7 +212,7 @@ simple_stmt = Forward()('simple_stmt')
 stmt = Forward()('stmt')
 suite_stmt = Forward()('suite_stmt')
 indentst = [1]
-suite = indentedBlock(suite_stmt, indentst, actions.getCol)#.setParseAction(actions.Suite)
+suite = indentedBlock(suite_stmt, indentst)#.setParseAction(actions.Suite)
 suite.setDebug().setName('suite')
 #suite = ((INDENT + OneOrMore(suite_stmt)) ^ simple_stmt )('suite').setDebug().setName('suite')
 #suite = ((NEWLINE + INDENT + OneOrMore(stmt) + UNDENT) | simple_stmt)('suite')#.setDebug().setName("suite")

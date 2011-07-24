@@ -3665,16 +3665,14 @@ def indentedBlock(blockStatementExpr, indentStack, indent=True):
             raise ParseException(s,l,"not an unindent")
         indentStack.pop()
 
-    NL = OneOrMore(LineEnd().setWhitespaceChars("\t ")).setDebug().setName('LINE END!!')#.suppress())
+    NL = OneOrMore(empty + LineEnd().setWhitespaceChars("\t ").suppress())
     INDENT = Empty() + Empty().setParseAction(checkSubIndent)
     PEER   = Empty().setParseAction(checkPeerIndent)
     UNDENT = Empty().setParseAction(checkUnindent)
-
     if indent:
         smExpr = Group( Optional(NL) +
             #~ FollowedBy(blockStatementExpr) +
-            INDENT + (OneOrMore( PEER.setDebug().setName('PEER') + Group(blockStatementExpr.setDebug().setName('BLOCK_STMT')) \
-			+ Optional(NL) )) + UNDENT.setDebug().setName('MATCHED DUNDENT'))
+            INDENT + (OneOrMore( PEER + Group(blockStatementExpr) + Optional(NL) )) + UNDENT)
     else:
         smExpr = Group( Optional(NL) +
             (OneOrMore( PEER + Group(blockStatementExpr) + Optional(NL) )) )
