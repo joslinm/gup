@@ -63,7 +63,12 @@ def checkSamedent(s,l,t):
 		pass
 	elif(not currentCol == indentStack[-1]):
 		raise ParseException(s,l,"Not same dent")
-	
+
+def checkReservedWords(s,l,t):
+	reserves = ['else','if','elif','else if']
+	print "ATOM CHECKING.." + t[0]
+	if t[0] in reserves:
+		raise ParseException(s,l,"Part of reserved words")
 	
 #SYMBOL TABLE
 symbol_table = []

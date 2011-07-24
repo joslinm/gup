@@ -24,7 +24,7 @@ XXX
 '''
 
 
-ParserElement.setDefaultWhitespaceChars(" \t")
+#ParserElement.setDefaultWhitespaceChars(" \t")
 #------------------------------------------------#
 # E L E M E N T S
 #------------------------------------------------#
@@ -48,7 +48,7 @@ STRING = (dblQuotedString | sglQuotedString)("STRING")
 NEWLINE = lineEnd.suppress()
 
 #Indentation
-INDENT = lineEnd.suppress() + empty + empty.copy().setParseAction(actions.checkIndent).setDebug().setName('indent')
+#INDENT = lineEnd.suppress() + empty + empty.copy().setParseAction(actions.checkIndent).setDebug().setName('indent')
 #INDENT = lineStart.setParseAction(actions.checkIndent).setDebug().setName('indent')
 #UNDENT = empty.copy().setParseAction(actions.checkUndent).setDebug().setName('undent')
 #SAME_DENT = lineEnd.suppress() + empty + empty.copy().setParseAction(actions.checkSamedent).setDebug().setName('samedent')
@@ -122,7 +122,10 @@ bitwiseOr = Literal('|')('bitwiseOr')
 bitwiseXor = Literal('^')('bitwiseXor')
 complement = Literal('~')('complement')
 
+#Reserves
+reserves = _while | _if | _elif | _else | _for | _continue | _pass | _def | _class
 
+ParserElement.setDefaultWhitespaceChars(" \t")
 #------------------------------------------------#
 # C O R E | G R A M M A R
 #------------------------------------------------#
@@ -137,9 +140,9 @@ import_stmt = import_name('import_stmt')
 test = Forward()('test')#.setParseAction(actions.Test)
 testlist_comp = Forward()('testlist_comp')
 testlist1 = Forward()('testlist1')
-atom = ((LPAREN + testlist_comp + RPAREN) \
+atom = NotAny(reserves) + ((LPAREN + testlist_comp + RPAREN) \
        ^ (TICK + testlist1 + TICK) \
-       ^ (NAME | NUM | OneOrMore(STRING)))('atom')
+       ^ (NAME | NUM | OneOrMore(STRING)))('atom').setParseAction(actions.checkReservedWords)
 	   
 #Expr node is a building block of many grammars
 #[depends on #Argument Lists] => *Forwards trailer
@@ -153,7 +156,7 @@ shift_expr = (arith_expr + ZeroOrMore((shiftLeft ^ shiftRight) + arith_expr)) \
 	('shift_expr')
 and_expr = (shift_expr + ZeroOrMore(bitwiseAnd + shift_expr))('and_expr')
 xor_expr = (and_expr + ZeroOrMore(complement + and_expr))('xor_expr')
-expr = (xor_expr + ZeroOrMore(bitwiseOr + xor_expr))('expr').setDebug().setName('EXPR')
+expr = (xor_expr + ZeroOrMore(bitwiseOr + xor_expr))('expr')#.setDebug().setName('EXPR')
 exprlist = (delimitedList(expr) + ENDCOMMA)('exprlist')
 
 #Comparison nodes
@@ -163,7 +166,7 @@ comparison = (expr + ZeroOrMore(comp_op + expr))('comparison').setDebug().setNam
 not_test = Forward()('not_test')
 not_test << ((_not +  not_test) ^ comparison).setDebug().setName("teasdfst")
 and_test = (not_test + ZeroOrMore(_and + not_test))('and_test')
-or_test = (and_test + ZeroOrMore(_or + and_test))('or_test')
+or_test = (and_test + ZeroOrMore(_or + and_test))('or_test').setDebug().setName('ORtest')
 test << Group(or_test + Optional(_if + or_test + _else + test))('test').setDebug().setName('test')
 comp_iter = Forward()('comp_iter')
 comp_for = (_for + exprlist + _in + or_test + Optional(comp_iter))('comp_for')
@@ -213,7 +216,7 @@ suite = indentedBlock(suite_stmt, indentst)#.setParseAction(actions.Suite)
 suite.setDebug().setName('indent blocked')
 #suite = ((INDENT + OneOrMore(suite_stmt)) ^ simple_stmt )('suite').setDebug().setName('suite')
 #suite = ((NEWLINE + INDENT + OneOrMore(stmt) + UNDENT) | simple_stmt)('suite')#.setDebug().setName("suite")
-if_stmt = ((Group(Group(_if + test + COLON + lineEnd) + suite + ZeroOrMore(Group(_elif + test + COLON) + suite) \
+if_stmt = ((Group(Group(_if + test + COLON) + suite + ZeroOrMore(Group(_elif + test + COLON) + suite) \
 		+ Optional(Group(_else + COLON) + suite)))('if_stmt')).setParseAction(actions.IfStatement) \
 		.setDebug().setName("if statement")
 for_stmt = (Group(_for + exprlist + _in + testlist + COLON) + suite \
@@ -241,7 +244,7 @@ augassign = (plusAssign ^ minusAssign ^ multAssign ^ divAssign ^ modAssign \
 global_stmt = (_global + delimitedList(NAME))('global_stmt')
 assert_stmt = (_assert + delimitedList(test))('assert_stmt')
 del_stmt = (_delete + exprlist)('del_stmt')
-print_stmt = (_print + Optional(delimitedList(test) + ENDCOMMA))('print_stmt')
+print_stmt = (_print + (delimitedList(test) + ENDCOMMA))('print_stmt')
 
 #Top level statements
 expr_stmt = (testlist + ZeroOrMore((augassign + testlist) ^ (assign + testlist)))('expr_stmt').setParseAction(actions.Expression)#.setDebug().setName('expression')
