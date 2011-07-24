@@ -256,7 +256,7 @@ compound_stmt = (if_stmt | while_stmt | for_stmt | funcdef | classdef | decorate
 	('compound_stmt').setName("compound statement").setDebug()
 
 suite_stmt << (small_stmt ^ compound_stmt)#.setParseAction(actions.checkSamedent)
-stmt << (simple_stmt ^ compound_stmt)#.setParseAction(actions.checkSamedent).setName("stmt").setDebug()
+stmt << (simple_stmt ^ compound_stmt)('stmt')#.setParseAction(actions.checkSamedent).setName("stmt").setDebug()
 
 #Top of our parser
 file_input = ZeroOrMore(stmt | NEWLINE).parseWithTabs()#.setDebug().setName("file_input")

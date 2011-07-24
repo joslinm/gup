@@ -89,73 +89,136 @@ UNDENT = lineEnd.suppress() + empty + empty.copy().setParseAction(checkUndent).s
 class Statement(object):
 	def __init__(self,t):
 		global indentLevel
-		self.arg = t
+		self.t = t
 		self.indentLevel = indentLevel
 	def __str__(self):
 		return " ".join(self.arg)
+	def accept(self):
+		for t in self.tokens:
+			try:
+				t.visit()
+			except:
+				pass #Do a literal translate here?
 
 class SimpleStatement(Statement):
 	def __init__(self,t):
-		self.arg = t
-		pprint.pprint(t.asList())
-		print "indent level = %s" % (indentLevel)
+		self.t = t
+		self.tokens = t.asList()
+		pprint.pprint(self.tokens)
 	def __str__(self):
-		return pprint.pformat(self.arg.asList())
+		return pprint.pformat(self.t.asList())
+	def accept(self):
+		for t in self.tokens:
+			try:
+				t.visit()
+			except:
+				pass #Do a literal translate here?
 		
 class CompoundStatement(Statement):
 	def __init__(self,t):
-		self.arg = t
+		self.t = t
 		pprint.pprint(t.asList())
-		print "indent level = %s" % (indentLevel)
 	def __str__(self):
-		return pprint.pformat(self.arg.asList())
+		return pprint.pformat(self.t.asList())
+	def accept(self):
+		for t in self.tokens:
+			try:
+				t.visit()
+			except:
+				pass #Do a literal translate here?
 
 class SmallStatement(SimpleStatement):
 	def __init__(self,t):
-		self.arg = t
+		self.t = t
 		pprint.pprint(t.asList())
-		print "indent level = %s" % (indentLevel)
 	def __str__(self):
-		return pprint.pformat(self.arg.asList())
+		return pprint.pformat(self.t.asList())
+	def accept(self):
+		for t in self.tokens:
+			try:
+				t.visit()
+			except:
+				pass #Do a literal translate here?
 
 class Suite(CompoundStatement):
 	def __init__(self,t):
-		self.arg = t
-		pprint.pprint("suite = %s" % t.asList())
+		self.t = t
+		self.tokens = t.asList()
 	def __str__(self):
-		for t in self.arg.asList():
+		for t in self.t.asList():
 			return pprint.pformat(t.asList())
+	def accept(self):
+		for t in self.tokens:
+			try:
+				t.visit()
+			except:
+				pass #Do a literal translate here?
 
 class IfStatement(CompoundStatement):
 	def __init__(self,t):
-		self.arg = t
+		self.t = t
 		pprint.pprint(t.asList())
+		self.tokens = t.asList()
 	def __str__(self):
-		return pprint.pformat(self.arg.asList())
+		return pprint.pformat(self.t.asList())
+	def accept(self):
+		for t in self.tokens:
+			try:
+				t.visit()
+			except:
+				pass #Do a literal translate here?
 
 class ForStatement(CompoundStatement):
 	def __init__(self,t):
-		self.arg = t
+		self.t = t
 		pprint.pprint(t.asList())
+		self.tokens = t.asList()
 	def __str__(self):
-		for t in self.arg.asList():
-			return pprint.pformat(t.asList())
+		for t in self.t.asList():
+			return pprint.pformat(self.t.asList())
+	def accept(self):
+		for t in self.tokens:
+			try:
+				t.visit()
+			except:
+				pass #Do a literal translate here?
 class WhileStatement(CompoundStatement):
 	def __init__(self,t):
-		self.arg = t
+		self.t = t
 		pprint.pprint(t.asList())
+		self.tokens = t.asList()
 	def __str__(self):
-		return pprint.pformat(self.arg.asList())
+		return pprint.pformat(self.t.asList())
+	def accept(self):
+		for t in self.tokens:
+			try:
+				t.visit()
+			except:
+				pass #Do a literal translate here?
 class FunctionDeclaration(CompoundStatement):
 	def __init__(self,t):
-		self.arg = t
+		self.t = t
 		pprint.pprint(t.asList())
+		self.tokens = t.asList()
 	def __str__(self):
-		return pprint.pformat(self.arg.asList())
+		return pprint.pformat(self.t.asList())
+	def accept(self):
+		for t in self.tokens:
+			try:
+				t.visit()
+			except:
+				pass #Do a literal translate here?
 class Expression(SmallStatement):
 	def __init__(self, t):
-		self.arg = t
+		self.t = t
+		self.tokens = t.asList()
 		#pprint.pprint(t.asList())
 	def __str__(self):
-		return pprint.pformat(self.arg.asList())
+		return pprint.pformat(self.t.asList())
+	def accept(self):
+		for t in self.tokens:
+			try:
+				t.visit()
+			except:
+				pass #Do a literal translate here?
 		
