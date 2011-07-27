@@ -52,7 +52,7 @@ class Statement(object):
 class SmallStatement(Statement):
 	def __init__(self,t):
 		pprint.pprint(t.asList())
-		print "indent level = %s" % (indentLevel) 
+		print "indent level = %s" % (indentLevel)
 
 class Suite(Statement):
 	def __init__(self,t):
@@ -61,7 +61,8 @@ class Suite(Statement):
 class IfStatement(Statement):
 	def __init__(self,t):
 		self.arg = t
-		#pprint.pprint(t.asList())
+		pprint.pprint(t.asList())
+		print indentLevel
 	def __str__(self):
 		return self.arg.asXML()
 
