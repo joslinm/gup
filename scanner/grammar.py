@@ -42,10 +42,10 @@ DOT = Suppress('.')
 COMMENT = Suppress(pythonStyleComment)
 
 #Basics
-NAME = Word(alphas)("NAME")
+NAME = Word(alphas)("NAME").setParseAction(actions.Name)
 NUM = (Word(nums) + Optional(DOT + Word(nums)))("NUM")
 STRING = (dblQuotedString | sglQuotedString)("STRING")
-NEWLINE = lineEnd.suppress().setParseAction(actions.getCol)
+NEWLINE = lineEnd.suppress()
 
 #Indentation
 #INDENT = lineEnd.suppress() + empty + empty.copy().setParseAction(actions.checkIndent).setDebug().setName('indent')
@@ -140,7 +140,7 @@ reserves = ( \
 	| complement
 )
 
-ParserElement.setDefaultWhitespaceChars(" \t")
+#ParserElement.setDefaultWhitespaceChars(" \t")
 #------------------------------------------------#
 # C O R E | G R A M M A R
 #------------------------------------------------#
@@ -157,7 +157,7 @@ testlist_comp = Forward()('testlist_comp')
 testlist1 = Forward()('testlist1')
 atom = ((LPAREN + testlist_comp + RPAREN) \
        ^ (TICK + testlist1 + TICK)
-       ^ (( (NotAny(reserves) + NAME) | NUM | OneOrMore(STRING))))('atom').setParseAction(actions.checkReservedWords)
+       ^ (( (NotAny(reserves) + NAME) | NUM | OneOrMore(STRING))))('atom')
 	   
 #Expr node is a building block of many grammars
 #[depends on #Argument Lists] => *Forwards trailer
@@ -177,7 +177,7 @@ exprlist = (delimitedList(expr) + ENDCOMMA)('exprlist')
 #Comparison nodes
 comp_op = (greater^lesser^greaterOrEqual^lesserOrEqual^equal^notequal^_is^_in^_not \
           ^ _not + _in ^ _is + _not)('comp_op')
-comparison = (expr + ZeroOrMore(comp_op + expr))('comparison').setDebug().setName('COMPARISON')
+comparison = (expr + ZeroOrMore(comp_op + expr))('comparison').setParseAction(actions.Comparison)
 not_test = Forward()('not_test')
 not_test << ((_not +  not_test) ^ comparison).setDebug().setName("teasdfst")
 and_test = (not_test + ZeroOrMore(_and + not_test))('and_test')
@@ -270,7 +270,9 @@ simple_stmt << (small_stmt + ZeroOrMore(';' + small_stmt) \
 compound_stmt = (if_stmt | while_stmt | for_stmt | funcdef | classdef | decorated) \
 	('compound_stmt').setName("compound statement").setDebug()
 
-suite_stmt << (small_stmt ^ compound_stmt)#.setParseAction(actions.checkSamedent)
+#small_stmt avoids simple_stmt EOL
+suite_stmt << (small_stmt ^ compound_stmt)
+
 stmt << (simple_stmt ^ compound_stmt)('stmt')#.setParseAction(actions.checkSamedent).setName("stmt").setDebug()
 
 #Top of our parser

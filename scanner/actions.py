@@ -17,7 +17,6 @@ TODO
 
 #INDENTATION
 indentStack = [1]
-indentLevel = 0
 
 def grabCol(s,l):
 	return col(l,s)
