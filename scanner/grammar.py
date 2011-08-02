@@ -171,7 +171,7 @@ shift_expr = (arith_expr + ZeroOrMore((shiftLeft ^ shiftRight) + arith_expr)) \
 	('shift_expr')
 and_expr = (shift_expr + ZeroOrMore(bitwiseAnd + shift_expr))('and_expr')
 xor_expr = (and_expr + ZeroOrMore(complement + and_expr))('xor_expr')
-expr = (xor_expr + ZeroOrMore(bitwiseOr + xor_expr))('expr')#.setDebug().setName('EXPR')
+expr = (xor_expr + ZeroOrMore(bitwiseOr + xor_expr))('expr')
 exprlist = (delimitedList(expr) + ENDCOMMA)('exprlist')
 
 #Comparison nodes
@@ -182,7 +182,7 @@ not_test = Forward()('not_test')
 not_test << ((_not +  not_test) ^ comparison).setDebug().setName("teasdfst")
 and_test = (not_test + ZeroOrMore(_and + not_test))('and_test')
 or_test = (and_test + ZeroOrMore(_or + and_test))('or_test').setDebug().setName('ORtest')
-test << Group(or_test + Optional(_if + or_test + _else + test))('test').setDebug().setName('test')
+test << (or_test + Optional(_if + or_test + _else + test))('test').setDebug().setName('test')
 comp_iter = Forward()('comp_iter')
 comp_for = (_for + exprlist + _in + or_test + Optional(comp_iter))('comp_for')
 comp_if = (_if + test + Optional(comp_iter))('comp_if')
@@ -231,9 +231,8 @@ suite = indentedBlock(suite_stmt, indentst)#.setParseAction(actions.Suite)
 suite.setDebug().setName('suite')
 #suite = ((INDENT + OneOrMore(suite_stmt)) ^ simple_stmt )('suite').setDebug().setName('suite')
 #suite = ((NEWLINE + INDENT + OneOrMore(stmt) + UNDENT) | simple_stmt)('suite')#.setDebug().setName("suite")
-if_stmt = ((Group(Group(_if + test + COLON) + suite + ZeroOrMore(Group(_elif + test + COLON) + suite) \
-		+ Optional(Group(_else + COLON) + suite)))('if_stmt')).setParseAction(actions.IfStatement) \
-		.setDebug().setName("if statement")
+if_stmt = (Group(_if + test + COLON) + suite + ZeroOrMore(Group(_elif + test + COLON) + suite) \
+		+ Optional(Group(_else + COLON) + suite)).setParseAction(actions.IfStatement)
 for_stmt = (Group(_for + exprlist + _in + testlist + COLON) + suite \
 		+ Optional(_else + COLON + suite))('for_stmt').setParseAction(actions.ForStatement)
 while_stmt = (Group(_while + test + COLON) + suite + Optional(_else + COLON + suite))('while').setParseAction(actions.WhileStatement)
