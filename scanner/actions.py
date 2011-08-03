@@ -10,13 +10,10 @@ NOTES
 
 TODO
 - Create class hierarchy			 		[ ]
-- Make parse action to catch wrong undents	[ ]
 - Create a translation dict	& make it		[ ]
 	so that every Keyword() is in there
 '''
 
-#INDENTATION
-indentStack = [1]
 
 def getCol(s,l,t):
 		print l
@@ -200,17 +197,5 @@ class Name(Expression):
 				t.visit()
 			except:
 				pass
-class Name(Expression):
-	def __init__(self, t):
-		self.t = t
-		self.tokens = t.asList()
-		#pprint.pprint(t.asList())
-	def __str__(self):
-		return pprint.pformat(self.t.asList())
-	def accept(self):
-		for t in self.tokens:
-			try:
-				t.visit()
-			except:
-				pass
+
 		
