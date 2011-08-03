@@ -43,8 +43,8 @@ COMMENT = Suppress(pythonStyleComment)
 
 #Basics
 NAME = Word(alphas)("NAME").setParseAction(actions.Name)
-NUM = (Word(nums) + Optional(DOT + Word(nums)))("NUM")
-STRING = (dblQuotedString | sglQuotedString)("STRING")
+NUM = (Word(nums) + Optional(DOT + Word(nums))).setParseAction(actions.Number)
+STRING = (dblQuotedString | sglQuotedString)("STRING").setParseAction(actions.String)
 NEWLINE = lineEnd.suppress()
 
 #Indentation
@@ -157,7 +157,7 @@ testlist_comp = Forward()('testlist_comp')
 testlist1 = Forward()('testlist1')
 atom = ((LPAREN + testlist_comp + RPAREN) \
        ^ (TICK + testlist1 + TICK)
-       ^ (( (NotAny(reserves) + NAME) | NUM | OneOrMore(STRING))))('atom')
+       ^ (( (NotAny(reserves) + NAME) | NUM | OneOrMore(STRING))))('atom').setParseAction(actions.Atom)
 	   
 #Expr node is a building block of many grammars
 #[depends on #Argument Lists] => *Forwards trailer
@@ -231,12 +231,12 @@ suite = indentedBlock(suite_stmt, indentst)#.setParseAction(actions.Suite)
 suite.setDebug().setName('suite')
 #suite = ((INDENT + OneOrMore(suite_stmt)) ^ simple_stmt )('suite').setDebug().setName('suite')
 #suite = ((NEWLINE + INDENT + OneOrMore(stmt) + UNDENT) | simple_stmt)('suite')#.setDebug().setName("suite")
-if_stmt = (Group(_if + test + COLON) + suite + ZeroOrMore(Group(_elif + test + COLON) + suite) \
-		+ Optional(Group(_else + COLON) + suite)).setParseAction(actions.IfStatement)
-for_stmt = (Group(_for + exprlist + _in + testlist + COLON) + suite \
+if_stmt = (_if + test + COLON + suite + ZeroOrMore(_elif + test + COLON + suite) \
+		+ Optional(_else + COLON) + suite).setParseAction(actions.IfStatement)
+for_stmt = (_for + exprlist + _in + testlist + COLON + suite \
 		+ Optional(_else + COLON + suite))('for_stmt').setParseAction(actions.ForStatement)
-while_stmt = (Group(_while + test + COLON) + suite + Optional(_else + COLON + suite))('while').setParseAction(actions.WhileStatement)
-funcdef = (Group(_def + NAME + parameters + COLON)('DefiningLine') + suite)('funcdef').setParseAction(actions.FunctionDeclaration)
+while_stmt = (_while + test + COLON + suite + Optional(_else + COLON + suite))('while').setParseAction(actions.WhileStatement)
+funcdef = (_def + NAME + parameters + COLON('DefiningLine') + suite)('funcdef').setParseAction(actions.FunctionDeclaration)
 return_stmt = (_return + Optional(testlist))('return_stmt')
 
 #Block flow control statments
@@ -267,12 +267,11 @@ small_stmt = (expr_stmt ^ print_stmt.setDebug().setName('PRINT') ^ del_stmt ^ pa
 simple_stmt << (small_stmt + ZeroOrMore(';' + small_stmt) \
 		+ Optional(SEMICOLON) + NEWLINE)#.setDebug().setName("simple statement")
 compound_stmt = (if_stmt | while_stmt | for_stmt | funcdef | classdef | decorated) \
-	('compound_stmt').setName("compound statement").setDebug()
+	('compound_stmt').setParseAction(actions.CompoundStatement)
 
-#small_stmt avoids simple_stmt EOL
+#suite_stmt avoids simple_stmt EOL
 suite_stmt << (small_stmt ^ compound_stmt)
-
-stmt << (simple_stmt ^ compound_stmt)('stmt')#.setParseAction(actions.checkSamedent).setName("stmt").setDebug()
+stmt << (simple_stmt ^ compound_stmt)('stmt').setParseAction(actions.Statement).setName("stmt").setDebug()
 
 #Top of our parser
-file_input = ZeroOrMore(stmt | NEWLINE).parseWithTabs()#.setDebug().setName("file_input")
+file_input = (ZeroOrMore(stmt | NEWLINE).parseWithTabs()).setParseAction(actions.Root)
