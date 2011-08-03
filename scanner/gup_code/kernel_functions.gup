@@ -1,0 +1,11 @@
+@kernel(True)
+def ImSoTrue():
+	print "Stay true."
+
+@kernel(x,y,z)
+def TellEm():
+	print "Got passed the last three letters of alphabet"
+	
+@kernel
+def Simple():
+	print "Stay simple."

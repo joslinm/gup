@@ -1,0 +1,8 @@
+def hello_world():
+	print "hello world!"
+
+def add_nums():
+	x = 4 + 3
+
+def add_nums(x,y):
+	return x + y

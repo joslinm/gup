@@ -83,7 +83,7 @@ def expr():
 	print tokens.dump()
 
 def stmt():
-	print "Running tests on [stmt]"
+	print "Running tests.."
 	#expr_stmt = (testlist + ZeroOrMore((augassign + testlist) ^ (assign + testlist)))('expr_stmt')
 	
 	data = '''x == 5:
@@ -99,14 +99,42 @@ def stmt():
 def file_input():
 	data = '''x == 5:
 	\tx*5'''
-	tokens = grammar.file_input.parseFile("code_test.gup")
+	tokens = grammar.file_input.parseFile(os.normcase("/code_test.gup"))
 	
 	print tokens.dump()
 
 def indent():
-	data = "\t"
 	tokens = grammar.INDENT.parseString(data)
 	print tokens.dump()
+	tokens = grammar.UNDENT.parseString("")
+	print tokens.dump()
+	
+
+def general_test():
+	import os
+	cdir = os.getcwd()
+	os.chdir(os.path.normcase(cdir + '/gup_code'))
+	tokens = grammar.file_input.parseFile("general.gup")
+	
+def test_files(file=None):
+	import os
+	cdir = os.getcwd()
+	os.chdir(os.path.normcase(cdir + '/gup_code'))
+	if file:
+		tokens = grammar.file_input.parseFile(file)
+		print tokens.asList()
+		import visitors
+		tokens[0].accept(visitors.PrintVisitor())
+		#print len(tokens[0][0][0][0][1])
+		#print tokens[0][0][0][0][1][2]
+	else:
+		files = ['if.gup', 'for.gup', 'while.gup', 'functions.gup',
+			'kernel_functions.gup']
+		
+		for file in files:
+			tokens = grammar.file_input.parseFile(file)
+			
+	os.chdir(cdir)
 
 #basics()
 #factor()
@@ -114,7 +142,12 @@ def indent():
 #trailer()
 #expr()
 #stmt()
+#indent()
 
-stmt()
 
-
+import sys
+for arg in sys.argv[1:]:
+	if arg == '-f':
+		test_files()
+	else:
+		test_files(arg + '.gup')
