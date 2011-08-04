@@ -1,8 +1,13 @@
-// gcc sample_program.c -o sample_program -lOpenCL && ./sample_program
+/* GUP VERSION
+ * 
+ * def main():
+ * 	
+ * 
+ * main()
+ * 
+ */
 
 #include "gupstd.h"
-
-#define BLOCK_SIZE 8
 
 int main() {
 	/// Thrown at the beginning of the main function
@@ -17,11 +22,7 @@ int main() {
 	char* data = newMatrix(width*height);
 	gup_matrix multMatrix = newMatrix(width*height);
 	gup_matrix multMatrix2 = newMatrix(width*height);
-	// for i=0 to width*height:
-	//     inputMatrix1[i] = i / 100.0f;
-	//     inputMatrix2[i] = i / 100.0f;
-	//     multMatrix[i] = 0;
-	//     transMatrix[i] = 0;
+	
 	int i;
 	for(i=0;i<width*height;i++) {
 		inputMatrix1[i] = i / 100.0f;
