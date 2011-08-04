@@ -46,11 +46,11 @@ class Root(object):
 		
 	def accept(self, visitor):
 		for t in self.tokens:
-			if type(t) == type(''):
-				visitor.visit(t)
-			else:
+			try:
 				t.accept(visitor)
-		visitor.visit(type(self).__name__)
+			except:
+				pass
+		visitor.visit(self)
 		
 class Statement(object):
 	def __init__(self,t):
@@ -63,11 +63,11 @@ class Statement(object):
 		
 	def accept(self, visitor):
 		for t in self.tokens:
-			if type(t) == type(''):
-				visitor.visit(t)
-			else:
+			try:
 				t.accept(visitor)
-		visitor.visit(type(self).__name__)
+			except:
+				pass
+		visitor.visit(self)
 		
 class SimpleStatement(object):
 	def __init__(self,t):
@@ -80,11 +80,11 @@ class SimpleStatement(object):
 		
 	def accept(self, visitor):
 		for t in self.tokens:
-			if type(t) == type(''):
-				visitor.visit(t)
-			else:
+			try:
 				t.accept(visitor)
-		visitor.visit(type(self).__name__)
+			except:
+				pass
+		visitor.visit(self)
 		
 class CompoundStatement(object):
 	def __init__(self,t):
@@ -97,11 +97,11 @@ class CompoundStatement(object):
 		
 	def accept(self, visitor):
 		for t in self.tokens:
-			if type(t) == type(''):
-				visitor.visit(t)
-			else:
+			try:
 				t.accept(visitor)
-		visitor.visit(type(self).__name__)
+			except:
+				pass
+		visitor.visit(self)
 
 class SmallStatement(object):
 	def __init__(self,t):
@@ -114,11 +114,11 @@ class SmallStatement(object):
 		
 	def accept(self, visitor):
 		for t in self.tokens:
-			if type(t) == type(''):
-				visitor.visit(t)
-			else:
+			try:
 				t.accept(visitor)
-		visitor.visit(type(self).__name__)
+			except:
+				pass
+		visitor.visit(self)
 
 class Suite(object):
 	def __init__(self,t):
@@ -131,11 +131,11 @@ class Suite(object):
 		
 	def accept(self, visitor):
 		for t in self.tokens:
-			if type(t) == type(''):
-				visitor.visit(t)
-			else:
+			try:
 				t.accept(visitor)
-		visitor.visit(type(self).__name__)
+			except:
+				pass
+		visitor.visit(self)
 
 class IfStatement(object):
 	def __init__(self,t):
@@ -148,11 +148,11 @@ class IfStatement(object):
 		
 	def accept(self, visitor):
 		for t in self.tokens:
-			if type(t) == type(''):
-				visitor.visit(t)
-			else:
+			try:
 				t.accept(visitor)
-		visitor.visit(type(self).__name__)
+			except:
+				pass
+		visitor.visit(self)
 
 class ForStatement(object):
 	def __init__(self,t):
@@ -165,12 +165,11 @@ class ForStatement(object):
 		
 	def accept(self, visitor):
 		for t in self.tokens:
-			if type(t) == type(''):
-				visitor.visit(t)
-			else:
+			try:
 				t.accept(visitor)
-		visitor.visit(type(self).__name__)
-		
+			except:
+				pass
+		visitor.visit(self)
 class WhileStatement(object):
 	def __init__(self,t):
 		self.t = t
@@ -182,11 +181,11 @@ class WhileStatement(object):
 		
 	def accept(self, visitor):
 		for t in self.tokens:
-			if type(t) == type(''):
-				visitor.visit(t)
-			else:
+			try:
 				t.accept(visitor)
-		visitor.visit(type(self).__name__)
+			except:
+				pass
+		visitor.visit(self)
 		
 class FunctionDeclaration(object):
 	def __init__(self,t):
@@ -199,11 +198,11 @@ class FunctionDeclaration(object):
 		
 	def accept(self, visitor):
 		for t in self.tokens:
-			if type(t) == type(''):
-				visitor.visit(t)
-			else:
+			try:
 				t.accept(visitor)
-		visitor.visit(type(self).__name__)
+			except:
+				pass
+		visitor.visit(self)
 		
 class Expression(object):
 	def __init__(self,t):
@@ -216,11 +215,11 @@ class Expression(object):
 		
 	def accept(self, visitor):
 		for t in self.tokens:
-			if type(t) == type(''):
-				visitor.visit(t)
-			else:
+			try:
 				t.accept(visitor)
-		visitor.visit(type(self).__name__)
+			except:
+				pass
+		visitor.visit(self)
 		
 class Comparison(object):
 	def __init__(self,t):
@@ -235,11 +234,11 @@ class Comparison(object):
 		
 	def accept(self, visitor):
 		for t in self.tokens:
-			if type(t) == type(''):
-				visitor.visit(t)
-			else:
+			try:
 				t.accept(visitor)
-		visitor.visit(type(self).__name__)
+			except:
+				pass
+		visitor.visit(self)
 		
 class Name(object):
 	def __init__(self,t):
@@ -252,11 +251,11 @@ class Name(object):
 		
 	def accept(self, visitor):
 		for t in self.tokens:
-			if type(t) == type(''):
-				visitor.visit(t)
-			else:
+			try:
 				t.accept(visitor)
-		visitor.visit(type(self).__name__)
+			except:
+				pass
+		visitor.visit(self)
 
 class String(object):
 	def __init__(self,t):
@@ -269,11 +268,11 @@ class String(object):
 		
 	def accept(self, visitor):
 		for t in self.tokens:
-			if type(t) == type(''):
-				visitor.visit(t)
-			else:
+			try:
 				t.accept(visitor)
-		visitor.visit(type(self).__name__)
+			except:
+				pass
+		visitor.visit(self)
 
 class Number(object):
 	def __init__(self,t):
@@ -286,11 +285,11 @@ class Number(object):
 		
 	def accept(self, visitor):
 		for t in self.tokens:
-			if type(t) == type(''):
-				visitor.visit(t)
-			else:
+			try:
 				t.accept(visitor)
-		visitor.visit(type(self).__name__)
+			except:
+				pass
+		visitor.visit(self)
 		
 class Atom(object):
 	def __init__(self,t):
@@ -303,8 +302,8 @@ class Atom(object):
 		
 	def accept(self, visitor):
 		for t in self.tokens:
-			if type(t) == type(''):
-				visitor.visit(t)
-			else:
+			try:
 				t.accept(visitor)
-		visitor.visit(type(self).__name__)
+			except:
+				pass
+		visitor.visit(self)
