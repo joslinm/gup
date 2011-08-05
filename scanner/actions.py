@@ -382,7 +382,7 @@ class Atom(object):
 		for t in self.tokens:
 			try:
 				t.accept(visitor)
-			except:
+			except Exception:
 				pass
 		visitor.visit(self)
 	def accept_str(self,list):
@@ -403,11 +403,6 @@ class Name(object):
 		return self.tokens[index]
 		
 	def accept(self, visitor):
-		for t in self.tokens:
-			try:
-				t.accept(visitor)
-			except:
-				pass
 		visitor.visit(self)
 	
 	def accept_str(self, list):
@@ -428,11 +423,6 @@ class String(object):
 		return self.tokens[index]
 		
 	def accept(self, visitor):
-		for t in self.tokens:
-			try:
-				t.accept(visitor)
-			except:
-				pass
 		visitor.visit(self)
 	
 	def accept_str(self, list):

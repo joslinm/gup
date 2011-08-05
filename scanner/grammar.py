@@ -258,7 +258,7 @@ augassign = (plusAssign ^ minusAssign ^ multAssign ^ divAssign ^ modAssign \
 global_stmt = (_global + delimitedList(NAME))('global_stmt')
 assert_stmt = (_assert + delimitedList(test))('assert_stmt')
 del_stmt = (_delete + exprlist)('del_stmt')
-print_stmt = (_print + (delimitedList(test) + ENDCOMMA)).setParseAction(actions.PrintStatement)('print_stmt')
+print_stmt = ('print' + (delimitedList(test) + ENDCOMMA)).setParseAction(actions.PrintStatement)('print_stmt')
 
 #Top level statements
 expr_stmt = (testlist + ZeroOrMore((augassign + testlist) ^ (assign + testlist)))('expr_stmt').setParseAction(actions.ExpressionStatement)#.setDebug().setName('expression')

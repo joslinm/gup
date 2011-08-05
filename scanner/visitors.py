@@ -1,5 +1,6 @@
 #Visitors
 
+translate_dict = {'print':'printf({0})'}
 
 class PrintVisitor(object):
 	#Calls function from its string name
@@ -49,6 +50,10 @@ class PrintListVisitor(object):
 	
 	def __init__(self):
 		self.tokens = []
+		#This buffer is limited to derivations of ATOM
+		self.str_buf = []
+		self.poststr_buf = []
+		self.node_buf = []
 		
 	#Calls function from its string name
 	def _func(self,name):
@@ -92,10 +97,11 @@ class PrintListVisitor(object):
 		##e.g. COMPARISON '=' COMPARISON 
 		print type(element).__name__
 		print element
-		print element[0][0][0][0][0]
+		raw_input()
 	def visit_PrintStatement(self, element):
 		print type(element).__name__
 		print element
+		raw_input()
 		
 		
 		
@@ -106,43 +112,48 @@ class PrintListVisitor(object):
 	def visit_IfBranch(self, element):
 		print type(element).__name__
 		print element
+		raw_input()
 	
 	def visit_Test(self, element):
 		print type(element).__name__
 		print element
+		raw_input()
 		
 	def visit_Expression(self, element):
 		print type(element).__name__
-		print self.tokens
+		print element
+		raw_input()
 	def visit_ArithmeticExpression(self, element):
 		print type(element).__name__
 		print element
-		print self.tokens
+		raw_input()
 		
 		
 	def visit_Comparison(self, element):
-		print str(element)
-		string = '{0} {1} {2}'
-		#b = self.tokens.pop()
-		#c = self.tokens.pop()
-		#print self.tokens
-		#a = string.format(c, element[1], b)
-		#a = comp_format.format(self.tokens.pop(), self.tokens.pop(), self.tokens.pop())
-		#self.tokens.append(a)
-		#a = self.tokens.pop()
-		#b = self.tokens.pop()
-		#c = string.format(a, self
-		print a
-		self.tokens.append(a)
+		print type(element).__name__
+		print element
+		raw_input()
 		
 	
 	def visit_Atom(self, element):
 		pass
 	def visit_Number(self, element):
+		print type(element).__name__
+		print element
+		raw_input()
 		#print element
 		self.tokens.append(element[0])
 	def visit_Name(self, element):
+		print type(element).__name__
+		print element
+		raw_input()
 		self.tokens.append(element[0])
 	def visit_String(self, element):
+		print type(element).__name__
+		print element
+		raw_input()
 		self.tokens.append(element[0])
-	
+	def visit_str(self, element):
+		print type(element).__name__
+		print element
+		raw_input()
