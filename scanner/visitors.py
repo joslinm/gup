@@ -7,6 +7,7 @@ class PrintVisitor(object):
 	def _func(self,name):
 		f = getattr(PrintVisitor(), 'visit_' + name)
 		return f
+	#General dispatcher
 	def visit(self,*args):
 		name = type(args[0]).__name__
 		elem = args[0]
@@ -67,26 +68,33 @@ class PrintListVisitor(object):
 	
 	#Visit methods
 	def visit_Root(self, element):
-		for l in element:
-			self.tokens.append(l)
+		print type(element).__name__
+		print element
+		raw_input()
 	def visit_Statement(self,element):
-		#print type(element).__name__
-		pass
+		print type(element).__name__
+		print element
+		raw_input()
 	def visit_CompoundStatement(self,element):
-		#print type(element).__name__
-		pass
+		print type(element).__name__
+		print element
+		raw_input()
 	def visit_SimpleStatement(self,element):
-		#print type(element).__name__
-		pass
+		print type(element).__name__
+		print element
+		raw_input()
 	def visit_SmallStatement(self,element):
-		#print type(element).__name__
-		pass
+		print type(element).__name__
+		print element
+		raw_input()
 	def visit_Suite(self, element):
-		#print type(element).__name__
-		pass
+		print type(element).__name__
+		print element
+		raw_input()
 	def visit_IfStatement(self, element):
-		#print type(element).__name__
-		pass
+		print type(element).__name__
+		print element
+		raw_input()
 	def visit_ForStatement(self, element):
 		#print type(element).__name__
 		pass
@@ -98,21 +106,25 @@ class PrintListVisitor(object):
 		print type(element).__name__
 		print element
 		raw_input()
+		length = len(element)
+		if length % 3 == 0:
+			self.merge(element)
+			
 	def visit_PrintStatement(self, element):
 		print type(element).__name__
 		print element
+		print len(element)
+		print len(element) % 2
 		raw_input()
-		
-		
+		length = len(element)
+		if length == 1:
+			pass
+		elif length % 2 == 0:
+			self.merge(element)
 		
 	def visit_FunctionDeclaration(self, element):
 		print type(element).__name__
 		pass
-	
-	def visit_IfBranch(self, element):
-		print type(element).__name__
-		print element
-		raw_input()
 	
 	def visit_Test(self, element):
 		print type(element).__name__
@@ -123,17 +135,29 @@ class PrintListVisitor(object):
 		print type(element).__name__
 		print element
 		raw_input()
+		
+		
 	def visit_ArithmeticExpression(self, element):
 		print type(element).__name__
 		print element
 		raw_input()
-		
+		length = len(element)
+		if length == 1:
+			pass
+		elif length % 3 == 0:
+			self.merge(element)
 		
 	def visit_Comparison(self, element):
 		print type(element).__name__
 		print element
+		print len(element)
+		length = len(element)
 		raw_input()
-		
+
+		if length == 1:
+			pass
+		elif length % 3 == 0:
+			self.merge(element)
 	
 	def visit_Atom(self, element):
 		pass
@@ -153,7 +177,16 @@ class PrintListVisitor(object):
 		print element
 		raw_input()
 		self.tokens.append(element[0])
-	def visit_str(self, element):
-		print type(element).__name__
+	
+	def merge(self,element):
+		#Going in reverse order coinicides with the stack
+		l = range(len(element))
+		l.reverse()
+		print l
 		print element
-		raw_input()
+		for x in l:
+			if type(element[x]) != type(''):
+				element[x] = self.tokens.pop()
+		r = ' '.join(element)
+		self.tokens.append(r)
+		print self.tokens

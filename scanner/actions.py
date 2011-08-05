@@ -24,7 +24,7 @@ def getCol(s,l,t):
 		print s	
 
 #SYMBOL TABLE
-symbol_table = []
+symbol_table = {}
 
 '''Class Structure
 					[root]
@@ -35,6 +35,29 @@ symbol_table = []
 						-------|
 '''
 
+class node(object):
+	def __init__(self,t):
+		global symbol_table
+		self.t = t
+		self.tokens = t.asList()
+	def __str__(self):
+		return str(self.t)
+	def __getitem__(self, index):
+		return self.t[index]
+	def __setitem__(self,key,value):
+		self.t[key] = value
+	def __len__(self):
+		return len(self.tokens)
+	
+	def accept(self, visitor):
+		for t in self.tokens:
+			try:
+				t.accept(visitor)
+			except:
+				pass
+				
+		visitor.visit(self)
+
 class Root(object):
 	def __init__(self,t):
 		self.t = t
@@ -42,7 +65,7 @@ class Root(object):
 	def __str__(self):
 		return str(self.t)
 	def __getitem__(self, index):
-		return self.tokens[index]
+		return self.t[index]
 		
 	def accept(self, visitor):
 		for t in self.tokens:
@@ -59,7 +82,7 @@ class Statement(object):
 	def __str__(self):
 		return str(self.t)
 	def __getitem__(self, index):
-		return self.tokens[index]
+		return self.t[index]
 		
 	def accept(self, visitor):
 		for t in self.tokens:
@@ -76,7 +99,7 @@ class SimpleStatement(object):
 	def __str__(self):
 		return str(self.t)
 	def __getitem__(self, index):
-		return self.tokens[index]
+		return self.t[index]
 		
 	def accept(self, visitor):
 		for t in self.tokens:
@@ -93,7 +116,7 @@ class CompoundStatement(object):
 	def __str__(self):
 		return str(self.t)
 	def __getitem__(self, index):
-		return self.tokens[index]
+		return self.t[index]
 		
 	def accept(self, visitor):
 		for t in self.tokens:
@@ -110,7 +133,7 @@ class SmallStatement(object):
 	def __str__(self):
 		return str(self.t)
 	def __getitem__(self, index):
-		return self.tokens[index]
+		return self.t[index]
 		
 	def accept(self, visitor):
 		for t in self.tokens:
@@ -127,7 +150,7 @@ class Suite(object):
 	def __str__(self):
 		return str(self.t)
 	def __getitem__(self, index):
-		return self.tokens[index]
+		return self.t[index]
 		
 	def accept(self, visitor):
 		for t in self.tokens:
@@ -144,7 +167,7 @@ class IfStatement(object):
 	def __str__(self):
 		return str(self.t)
 	def __getitem__(self, index):
-		return self.tokens[index]
+		return self.t[index]
 		
 	def accept(self, visitor):
 		for t in self.tokens:
@@ -161,7 +184,7 @@ class ForStatement(object):
 	def __str__(self):
 		return str(self.t)
 	def __getitem__(self, index):
-		return self.tokens[index]
+		return self.t[index]
 		
 	def accept(self, visitor):
 		for t in self.tokens:
@@ -177,7 +200,7 @@ class WhileStatement(object):
 	def __str__(self):
 		return str(self.t)
 	def __getitem__(self, index):
-		return self.tokens[index]
+		return self.t[index]
 		
 	def accept(self, visitor):
 		for t in self.tokens:
@@ -189,12 +212,17 @@ class WhileStatement(object):
 
 class ExpressionStatement(object):
 	def __init__(self,t):
+		global symbol_table
 		self.t = t
 		self.tokens = t.asList()
 	def __str__(self):
 		return str(self.t)
 	def __getitem__(self, index):
-		return self.tokens[index]
+		return self.t[index]
+	def __setitem__(self,key,value):
+		self.t[key] = value
+	def __len__(self):
+		return len(self.tokens)
 		
 	def accept(self, visitor):
 		for t in self.tokens:
@@ -218,7 +246,11 @@ class PrintStatement(object):
 	def __str__(self):
 		return str(self.t)
 	def __getitem__(self, index):
-		return self.tokens[index]
+		return self.t[index]
+	def __setitem__(self,key,value):
+		self.t[key] = value
+	def __len__(self):
+		return len(self.tokens)
 		
 	def accept(self, visitor):
 		for t in self.tokens:
@@ -242,7 +274,7 @@ class FunctionDeclaration(object):
 	def __str__(self):
 		return str(self.t)
 	def __getitem__(self, index):
-		return self.tokens[index]
+		return self.t[index]
 		
 	def accept(self, visitor):
 		for t in self.tokens:
@@ -259,7 +291,7 @@ class IfBranch(object):
 	def __str__(self):
 		return str(self.t)
 	def __getitem__(self, index):
-		return self.tokens[index]
+		return self.t[index]
 		
 	def accept(self, visitor):
 		for t in self.tokens:
@@ -268,103 +300,17 @@ class IfBranch(object):
 			except:
 				pass
 		visitor.visit(self)
-class Test(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.tokens[index]
-		
-	def accept(self, visitor):
-		for t in self.tokens:
-			try:
-				t.accept(visitor)
-			except:
-				pass
-		visitor.visit(self)		
+class Test(node):
+	pass	
 ####
 ####COMPARISON -- [EXPRESSION]
 ####		
-class Expression(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.tokens[index]
-		
-	def accept(self, visitor):
-		for t in self.tokens:
-			try:
-				t.accept(visitor)
-			except:
-				pass
-		visitor.visit(self)
-
-class ArithmeticExpression(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.tokens[index]
-	def __len__(self):
-		return len(self.tokens)
-		
-	def accept(self, visitor):
-		for t in self.tokens:
-			try:
-				t.accept(visitor)
-			except Exception:
-				pass
-		visitor.visit(self)
-	
-	def accept_str(self, lis):
-		print "sldkjfs" + self.tokens
-		for t in self.tokens:
-			print "Token: %s" % str(t)
-			if type(t) is type(''):
-				print 'pushing'
-				lis.push(t)
-			else:
-				print 'extending list'
-				lis.extend(t.accept_str(list))
-		return lis
-
-class Comparison(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.tokens[index]
-	def __len__(self):
-		return len(self.tokens)
-		
-	def accept(self, visitor):
-		for t in self.tokens:
-			try:
-				t.accept(visitor)
-			except Exception:
-				pass
-		visitor.visit(self)
-	
-	def accept_str(self, lis):
-		print "sldkjfs" + self.tokens
-		for t in self.tokens:
-			print "Token: %s" % str(t)
-			if type(t) is type(''):
-				print 'pushing'
-				lis.push(t)
-			else:
-				print 'extending list'
-				lis.extend(t.accept_str(list))
-		return lis
+class Comparison(node):
+	pass
+class Expression(node):
+	pass
+class ArithmeticExpression(node):
+	pass
 
 ####
 ####ATOM -- [NAME | NUMBER | STRING]
@@ -376,7 +322,7 @@ class Atom(object):
 	def __str__(self):
 		return str(self.t)
 	def __getitem__(self, index):
-		return self.tokens[index]
+		return self.t[index]
 		
 	def accept(self, visitor):
 		for t in self.tokens:
@@ -393,63 +339,12 @@ class Atom(object):
 				list.extend(t.accept_str(list))
 		return list
 		
-class Name(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.tokens[index]
-		
-	def accept(self, visitor):
-		visitor.visit(self)
-	
-	def accept_str(self, list):
-		for t in self.tokens:
-			if type(t) == type(''):
-				list.append(t)
-			else:
-				list.extend(t.accept_str(list))
-		return list
+class Name(node):
+	pass
 
-class String(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.tokens[index]
-		
-	def accept(self, visitor):
-		visitor.visit(self)
-	
-	def accept_str(self, list):
-		for t in self.tokens:
-			if type(t) == type(''):
-				list.push(t)
-			else:
-				list.extend(t.accept_str(list))
-		return list
+class String(node):
+	pass
 
 class Number(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.tokens[index]
-		
-	def accept(self, visitor):
-		visitor.visit(self)
-	
-	def accept_str(self, list):
-		for t in self.tokens:
-			if type(t) == type(''):
-				list.push(t)
-			else:
-				list.extend(t.accept_str(list))
-		return list
+	pass
 
