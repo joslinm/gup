@@ -1,40 +1,20 @@
 from pyparsing import *
-import pprint
 '''
 -----
 GUP.scanner.actions
 Definition of parse actions on grammar including classes
 -----
-NOTES
-- Indentation is handled here and every stmt is given an indent level
 
 TODO
-- Create class hierarchy			 		[ ]
-- Make parse action to catch wrong undents	[ ]
 - Create a translation dict	& make it		[ ]
 	so that every Keyword() is in there
 '''
 
-#INDENTATION
-indentStack = [1]
-
-def getCol(s,l,t):
-		print l
-		print col(l,s)
-		print s	
-
 #SYMBOL TABLE
 symbol_table = {}
 
-'''Class Structure
-					[root]
-					[stmt]*
-		[smpl_stmt]  --|--	[cmpd_stmt]
-	{expr,print,del..}	| {if,while,for,..}
-		...				|	[suite]
-						-------|
-'''
-
+# Defines node methods & accept, each node inherits node 
+# and does not have to define any methods of its own
 class node(object):
 	def __init__(self,t):
 		global symbol_table
@@ -58,253 +38,91 @@ class node(object):
 				
 		visitor.visit(self)
 
-class Root(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.t[index]
-		
-	def accept(self, visitor):
-		for t in self.tokens:
-			try:
-				t.accept(visitor)
-			except:
-				pass
-		visitor.visit(self)
-		
-class Statement(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.t[index]
-		
-	def accept(self, visitor):
-		for t in self.tokens:
-			try:
-				t.accept(visitor)
-			except:
-				pass
-		visitor.visit(self)
-		
-class SimpleStatement(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.t[index]
-		
-	def accept(self, visitor):
-		for t in self.tokens:
-			try:
-				t.accept(visitor)
-			except:
-				pass
-		visitor.visit(self)
-		
-class CompoundStatement(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.t[index]
-		
-	def accept(self, visitor):
-		for t in self.tokens:
-			try:
-				t.accept(visitor)
-			except:
-				pass
-		visitor.visit(self)
+#[ROOT]
+class Root(node): 
+	#(stmt | NEWLINE)*
+	pass
 
-class SmallStatement(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.t[index]
-		
-	def accept(self, visitor):
-		for t in self.tokens:
-			try:
-				t.accept(visitor)
-			except:
-				pass
-		visitor.visit(self)
+##[STMT]
+class Statement(node): 
+	#(simple_stmt ^ compound_stmt)
+	pass
 
-class Suite(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.t[index]
-		
-	def accept(self, visitor):
-		for t in self.tokens:
-			try:
-				t.accept(visitor)
-			except:
-				pass
-		visitor.visit(self)
+### [COMPOUND_STATEMENT] ^ [SIMPLE_STATEMENT]
+class SimpleStatement(node):
+	#(small_stmt)
+	pass
+class CompoundStatement(node):
+	#(if_stmt | while_stmt | for_stmt | funcdef | classdef | decorated)*
+	pass
 
-class IfStatement(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.t[index]
-		
-	def accept(self, visitor):
-		for t in self.tokens:
-			try:
-				t.accept(visitor)
-			except:
-				pass
-		visitor.visit(self)
+####
+#Simple Statement --> 4th level: small_stmt
+####		
+class SmallStatement(node):
+	pass
+	
+####
+#Compound Statement --> 4th level: if|while|for|funcdef|classdef|decorated
+####				
+class IfStatement(node):
+	pass
+class ForStatement(node):
+	pass
+class WhileStatement(node):
+	pass
+class FunctionDeclaration(node):
+	pass
+class ClassDeclaration(node):
+	pass
+class DecoratedDeclaration(node):
+	pass
 
-class ForStatement(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.t[index]
-		
-	def accept(self, visitor):
-		for t in self.tokens:
-			try:
-				t.accept(visitor)
-			except:
-				pass
-		visitor.visit(self)
-class WhileStatement(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.t[index]
-		
-	def accept(self, visitor):
-		for t in self.tokens:
-			try:
-				t.accept(visitor)
-			except:
-				pass
-		visitor.visit(self)
+####
+#Small Statement --> 5th level: expr_stmt|print_stmt|del_stmt|pass_stmt|flow_stmt|import_stmt
+####
+class ExpressionStatement(node):
+	pass		
+class PrintStatement(node):
+	pass		
+class DeleteStatement(node):
+	pass
+class PassStatement(node):
+	pass
+class ImportStatement(node):
+	pass
 
-class ExpressionStatement(object):
-	def __init__(self,t):
-		global symbol_table
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.t[index]
-	def __setitem__(self,key,value):
-		self.t[key] = value
-	def __len__(self):
-		return len(self.tokens)
-		
-	def accept(self, visitor):
-		for t in self.tokens:
-			try:
-				t.accept(visitor)
-			except:
-				pass
-		visitor.visit(self)
-	def accept_str(self,list):
-		for t in self.tokens:
-			if type(t) == type(''):
-				list.push(t)
-			else:
-				list.extend(t.accept_str(list))
-		return list
-		
-class PrintStatement(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.t[index]
-	def __setitem__(self,key,value):
-		self.t[key] = value
-	def __len__(self):
-		return len(self.tokens)
-		
-	def accept(self, visitor):
-		for t in self.tokens:
-			try:
-				t.accept(visitor)
-			except:
-				pass
-		visitor.visit(self)
-	def accept_str(self,list):
-		for t in self.tokens:
-			if type(t) == type(''):
-				list.push(t)
-			else:
-				list.extend(t.accept_str(list))
-		return list
-		
-class FunctionDeclaration(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.t[index]
-		
-	def accept(self, visitor):
-		for t in self.tokens:
-			try:
-				t.accept(visitor)
-			except:
-				pass
-		visitor.visit(self)
-		
-class IfBranch(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.t[index]
-		
-	def accept(self, visitor):
-		for t in self.tokens:
-			try:
-				t.accept(visitor)
-			except:
-				pass
-		visitor.visit(self)
+###
+#Flow Statement --> pass, break, continue
+class FlowStatement(node):
+	pass
+class ContinueStatement(node):
+	pass
+class BreakStatement(node):
+	pass
+class PassStatement(node):
+	pass
+class ReturnStatement(node):
+	pass
+
+#################################################################
+# # # # # # # # # # # # L O W E R   #   L E V E L S # # # # # # # ## # # # # # # # ## # # # # # 
+#################################################################
+
+####
+#Compound Statements' 4th level --> test,suite,exprlist, parameters
+#NOTE: Consider turning if test: while test: for x in y: def NAME parameters: into their respective branch classes
+####
+class Suite(node): #(small_stmt ^ compound_stmt)
+	pass
+class Parameters(node):
+	pass
+
+####
+#Test --> COMPARISON --> [EXPRESSION] --> smaller expressions
+####
 class Test(node):
 	pass	
-####
-####COMPARISON -- [EXPRESSION]
-####		
 class Comparison(node):
 	pass
 class Expression(node):
@@ -313,38 +131,14 @@ class ArithmeticExpression(node):
 	pass
 
 ####
-####ATOM -- [NAME | NUMBER | STRING]
+#Atom --> [NAME | NUMBER | STRING]
 ####
-class Atom(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.t[index]
-		
-	def accept(self, visitor):
-		for t in self.tokens:
-			try:
-				t.accept(visitor)
-			except Exception:
-				pass
-		visitor.visit(self)
-	def accept_str(self,list):
-		for t in self.tokens:
-			if type(t) == type(''):
-				list.push(t)
-			else:
-				list.extend(t.accept_str(list))
-		return list
-		
+class Atom(node):
+	pass
 class Name(node):
 	pass
-
 class String(node):
 	pass
-
-class Number(object):
+class Number(node):
 	pass
 
