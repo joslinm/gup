@@ -36,10 +36,13 @@ class node(object):
 			return self.t[0]
 	
 	def traverse_to(self, obj_name):
-		if obj_name == type(self).__name__:
-			return self
-		else:
-			return self.t[0].traverse_to(obj_name)
+		try:
+			if obj_name == type(self).__name__:
+				return self
+			else:
+				return self.t[0].traverse_to(obj_name)
+		except:
+			return None
 		
 	def accept(self, visitor):
 		for t in self.tokens:
@@ -93,22 +96,31 @@ class DecoratedDeclaration(node):
 ####
 #Small Statement --> 5th level: expr_stmt|print_stmt|del_stmt|pass_stmt|flow_stmt|import_stmt
 ####
+
+#Expression statement catches assignment statements & operates on the NAME
 class ExpressionStatement(node):
-	#pass
 	def __init__(self, t):
 		self.tokens = t.asList()
 		self.t = t
+		self.check_assignment()
 		
-		#Check for assignment statement & grab name
 		
-		print self.tokens
-		raw_input()
-		a = t[0].traverse_to('Name')
-		a.type = 'NUM'
-		print a.type
-		raw_input()
-		print t[0].get_child_str()
-		raw_input()
+	#Check for assignment statement & grab name
+	def check_assignment(self):
+		if self.t[1] == '=':
+			search_obj = self.t[2].traverse_to
+			name_obj = self.t[0].traverse_to('Name')
+		
+			if search_obj('Number'):
+				name_obj.type = 'NUM'
+			elif search_obj('String'):
+				name_obj.type = 'STRING'
+			else:
+				name_obj.type = 'KEYWORD'
+				
+			return name_obj.type
+		else:
+			return None
 		
 		#type_tokens = map(lambda x : type(x), self.tokens)
 		#print type_tokens
