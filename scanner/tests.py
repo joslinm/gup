@@ -126,7 +126,11 @@ def test_files(file=None):
 		import visitors
 		pl = visitors.PrintListVisitor()
 		
+		
 		tokens[0].accept(pl)
+		f = open(cdir + '/gup_code/' + 'translated.c', 'w')
+		for x in pl.tokens:
+			f.write(x)
 		#print pl.tokens
 		
 		#print len(tokens[0][0][0][0][1])

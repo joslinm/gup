@@ -156,30 +156,30 @@ class PrintListVisitor(Visitor):
 	def visit_Root(self, element):
 		print type(element).__name__
 		print element
-		raw_input()
+		
 	def visit_Statement(self,element):
 		print type(element).__name__
 		print element
-		raw_input()
+		
 	def visit_CompoundStatement(self,element):
 		print type(element).__name__
 		print element
-		raw_input()
+		
 	def visit_SimpleStatement(self,element):
 		print type(element).__name__
 		print element
-		raw_input()
+		
 	def visit_SmallStatement(self,element):
 		print type(element).__name__
 		print element
-		raw_input()
+		
 		self.append(';\n')
 		
 	def visit_Suite(self, element):
 		print type(element).__name__
 		print element
 		print self.tokens
-		raw_input()
+		
 		self.merge(element)
 		self.prepend('{\n')
 		self.append('\n}')
@@ -187,8 +187,8 @@ class PrintListVisitor(Visitor):
 	def visit_IfStatement(self, element):
 		print type(element).__name__
 		print element
-		raw_input()
-		self.merge(element, debug=True)
+		
+		self.merge(element)
 		
 	def visit_ForStatement(self, element):
 		#print type(element).__name__
@@ -200,7 +200,7 @@ class PrintListVisitor(Visitor):
 		##e.g. COMPARISON '=' COMPARISON 
 		print type(element).__name__
 		print element
-		raw_input()
+		
 		length = len(element)
 		if length % 3 == 0:
 			self.merge(element)
@@ -210,7 +210,7 @@ class PrintListVisitor(Visitor):
 		print element
 		print len(element)
 		print len(element) % 2
-		raw_input()
+		
 		length = len(element)
 		if length == 1:
 			pass
@@ -224,18 +224,18 @@ class PrintListVisitor(Visitor):
 	def visit_Test(self, element):
 		print type(element).__name__
 		print element
-		raw_input()
+		
 		
 	def visit_Expression(self, element):
 		print type(element).__name__
 		print element
-		raw_input()
+		
 		
 		
 	def visit_ArithmeticExpression(self, element):
 		print type(element).__name__
 		print element
-		raw_input()
+		
 		length = len(element)
 		if length == 1:
 			pass
@@ -247,7 +247,7 @@ class PrintListVisitor(Visitor):
 		print element
 		print len(element)
 		length = len(element)
-		raw_input()
+		
 
 		if length == 1:
 			pass
@@ -259,18 +259,18 @@ class PrintListVisitor(Visitor):
 	def visit_Number(self, element):
 		print type(element).__name__
 		print element
-		raw_input()
+		
 		#print element
 		self.tokens.append(element[0])
 	def visit_Name(self, element):
 		print type(element).__name__
 		print element
-		raw_input()
+		
 		self.tokens.append(element[0])
 	def visit_String(self, element):
 		print type(element).__name__
 		print element
-		raw_input()
+		
 		self.tokens.append(element[0])
 	
 	
