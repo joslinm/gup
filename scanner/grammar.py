@@ -166,12 +166,12 @@ trailer = Forward()('trailer')
 power = (atom + ZeroOrMore(trailer) + Optional('**' + factor))("power")
 factor << (((plus ^ minus ^ complement) + factor) ^ power)
 term = (factor + ZeroOrMore((mult ^ div ^ mod ^ divFloor) + factor))('term')
-arith_expr = (term + ZeroOrMore((plus ^ minus) + term))('arith_expr')
+arith_expr = (term + ZeroOrMore((plus ^ minus) + term))('arith_expr').setParseAction(actions.ArithmeticExpression)
 shift_expr = (arith_expr + ZeroOrMore((shiftLeft ^ shiftRight) + arith_expr)) \
 	('shift_expr')
 and_expr = (shift_expr + ZeroOrMore(bitwiseAnd + shift_expr))('and_expr')
 xor_expr = (and_expr + ZeroOrMore(complement + and_expr))('xor_expr')
-expr = (xor_expr + ZeroOrMore(bitwiseOr + xor_expr))('expr')
+expr = (xor_expr + ZeroOrMore(bitwiseOr + xor_expr)).setParseAction(actions.Expression)('expr')
 exprlist = (delimitedList(expr) + ENDCOMMA)('exprlist')
 
 #Comparison nodes
@@ -182,7 +182,7 @@ not_test = Forward()('not_test')
 not_test << ((_not +  not_test) ^ comparison).setDebug().setName("teasdfst")
 and_test = (not_test + ZeroOrMore(_and + not_test))('and_test')
 or_test = (and_test + ZeroOrMore(_or + and_test))('or_test').setDebug().setName('ORtest')
-test << (or_test + Optional(_if + or_test + _else + test))('test').setDebug().setName('test')
+test << (or_test + Optional(_if + or_test + _else + test))('test').setParseAction(actions.Test)
 comp_iter = Forward()('comp_iter')
 comp_for = (_for + exprlist + _in + or_test + Optional(comp_iter))('comp_for')
 comp_if = (_if + test + Optional(comp_iter))('comp_if')
@@ -258,10 +258,10 @@ augassign = (plusAssign ^ minusAssign ^ multAssign ^ divAssign ^ modAssign \
 global_stmt = (_global + delimitedList(NAME))('global_stmt')
 assert_stmt = (_assert + delimitedList(test))('assert_stmt')
 del_stmt = (_delete + exprlist)('del_stmt')
-print_stmt = (_print + (delimitedList(test) + ENDCOMMA))('print_stmt')
+print_stmt = (_print + (delimitedList(test) + ENDCOMMA)).setParseAction(actions.PrintStatement)('print_stmt')
 
 #Top level statements
-expr_stmt = (testlist + ZeroOrMore((augassign + testlist) ^ (assign + testlist)))('expr_stmt').setParseAction(actions.Expression)#.setDebug().setName('expression')
+expr_stmt = (testlist + ZeroOrMore((augassign + testlist) ^ (assign + testlist)))('expr_stmt').setParseAction(actions.ExpressionStatement)#.setDebug().setName('expression')
 small_stmt = (expr_stmt ^ print_stmt.setDebug().setName('PRINT') ^ del_stmt ^ pass_stmt ^ flow_stmt \
 		^ import_stmt ^ global_stmt ^ assert_stmt)('small_stmt').setDebug().setName("small_stmt").setParseAction(actions.SmallStatement)
 simple_stmt << (small_stmt + ZeroOrMore(';' + small_stmt) \

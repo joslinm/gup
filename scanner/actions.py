@@ -186,6 +186,54 @@ class WhileStatement(object):
 			except:
 				pass
 		visitor.visit(self)
+
+class ExpressionStatement(object):
+	def __init__(self,t):
+		self.t = t
+		self.tokens = t.asList()
+	def __str__(self):
+		return str(self.t)
+	def __getitem__(self, index):
+		return self.tokens[index]
+		
+	def accept(self, visitor):
+		for t in self.tokens:
+			try:
+				t.accept(visitor)
+			except:
+				pass
+		visitor.visit(self)
+	def accept_str(self,list):
+		for t in self.tokens:
+			if type(t) == type(''):
+				list.push(t)
+			else:
+				list.extend(t.accept_str(list))
+		return list
+		
+class PrintStatement(object):
+	def __init__(self,t):
+		self.t = t
+		self.tokens = t.asList()
+	def __str__(self):
+		return str(self.t)
+	def __getitem__(self, index):
+		return self.tokens[index]
+		
+	def accept(self, visitor):
+		for t in self.tokens:
+			try:
+				t.accept(visitor)
+			except:
+				pass
+		visitor.visit(self)
+	def accept_str(self,list):
+		for t in self.tokens:
+			if type(t) == type(''):
+				list.push(t)
+			else:
+				list.extend(t.accept_str(list))
+		return list
 		
 class FunctionDeclaration(object):
 	def __init__(self,t):
@@ -204,6 +252,41 @@ class FunctionDeclaration(object):
 				pass
 		visitor.visit(self)
 		
+class IfBranch(object):
+	def __init__(self,t):
+		self.t = t
+		self.tokens = t.asList()
+	def __str__(self):
+		return str(self.t)
+	def __getitem__(self, index):
+		return self.tokens[index]
+		
+	def accept(self, visitor):
+		for t in self.tokens:
+			try:
+				t.accept(visitor)
+			except:
+				pass
+		visitor.visit(self)
+class Test(object):
+	def __init__(self,t):
+		self.t = t
+		self.tokens = t.asList()
+	def __str__(self):
+		return str(self.t)
+	def __getitem__(self, index):
+		return self.tokens[index]
+		
+	def accept(self, visitor):
+		for t in self.tokens:
+			try:
+				t.accept(visitor)
+			except:
+				pass
+		visitor.visit(self)		
+####
+####COMPARISON -- [EXPRESSION]
+####		
 class Expression(object):
 	def __init__(self,t):
 		self.t = t
@@ -220,7 +303,38 @@ class Expression(object):
 			except:
 				pass
 		visitor.visit(self)
+
+class ArithmeticExpression(object):
+	def __init__(self,t):
+		self.t = t
+		self.tokens = t.asList()
+	def __str__(self):
+		return str(self.t)
+	def __getitem__(self, index):
+		return self.tokens[index]
+	def __len__(self):
+		return len(self.tokens)
 		
+	def accept(self, visitor):
+		for t in self.tokens:
+			try:
+				t.accept(visitor)
+			except Exception:
+				pass
+		visitor.visit(self)
+	
+	def accept_str(self, lis):
+		print "sldkjfs" + self.tokens
+		for t in self.tokens:
+			print "Token: %s" % str(t)
+			if type(t) is type(''):
+				print 'pushing'
+				lis.push(t)
+			else:
+				print 'extending list'
+				lis.extend(t.accept_str(list))
+		return lis
+
 class Comparison(object):
 	def __init__(self,t):
 		self.t = t
@@ -236,9 +350,48 @@ class Comparison(object):
 		for t in self.tokens:
 			try:
 				t.accept(visitor)
+			except Exception:
+				pass
+		visitor.visit(self)
+	
+	def accept_str(self, lis):
+		print "sldkjfs" + self.tokens
+		for t in self.tokens:
+			print "Token: %s" % str(t)
+			if type(t) is type(''):
+				print 'pushing'
+				lis.push(t)
+			else:
+				print 'extending list'
+				lis.extend(t.accept_str(list))
+		return lis
+
+####
+####ATOM -- [NAME | NUMBER | STRING]
+####
+class Atom(object):
+	def __init__(self,t):
+		self.t = t
+		self.tokens = t.asList()
+	def __str__(self):
+		return str(self.t)
+	def __getitem__(self, index):
+		return self.tokens[index]
+		
+	def accept(self, visitor):
+		for t in self.tokens:
+			try:
+				t.accept(visitor)
 			except:
 				pass
 		visitor.visit(self)
+	def accept_str(self,list):
+		for t in self.tokens:
+			if type(t) == type(''):
+				list.push(t)
+			else:
+				list.extend(t.accept_str(list))
+		return list
 		
 class Name(object):
 	def __init__(self,t):
@@ -256,6 +409,14 @@ class Name(object):
 			except:
 				pass
 		visitor.visit(self)
+	
+	def accept_str(self, list):
+		for t in self.tokens:
+			if type(t) == type(''):
+				list.append(t)
+			else:
+				list.extend(t.accept_str(list))
+		return list
 
 class String(object):
 	def __init__(self,t):
@@ -273,6 +434,14 @@ class String(object):
 			except:
 				pass
 		visitor.visit(self)
+	
+	def accept_str(self, list):
+		for t in self.tokens:
+			if type(t) == type(''):
+				list.push(t)
+			else:
+				list.extend(t.accept_str(list))
+		return list
 
 class Number(object):
 	def __init__(self,t):
@@ -284,26 +453,13 @@ class Number(object):
 		return self.tokens[index]
 		
 	def accept(self, visitor):
-		for t in self.tokens:
-			try:
-				t.accept(visitor)
-			except:
-				pass
 		visitor.visit(self)
-		
-class Atom(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.tokens[index]
-		
-	def accept(self, visitor):
+	
+	def accept_str(self, list):
 		for t in self.tokens:
-			try:
-				t.accept(visitor)
-			except:
-				pass
-		visitor.visit(self)
+			if type(t) == type(''):
+				list.push(t)
+			else:
+				list.extend(t.accept_str(list))
+		return list
+
