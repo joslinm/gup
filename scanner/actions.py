@@ -29,6 +29,18 @@ class node(object):
 	def __len__(self):
 		return len(self.tokens)
 	
+	def get_child_str(self):
+		if type(self.t[0]) is not type(''):
+			return self.t[0].get_child_str()
+		else:
+			return self.t[0]
+	
+	def traverse_to(self, obj_name):
+		if obj_name == type(self).__name__:
+			return self
+		else:
+			return self.t[0].traverse_to(obj_name)
+		
 	def accept(self, visitor):
 		for t in self.tokens:
 			try:
@@ -82,7 +94,36 @@ class DecoratedDeclaration(node):
 #Small Statement --> 5th level: expr_stmt|print_stmt|del_stmt|pass_stmt|flow_stmt|import_stmt
 ####
 class ExpressionStatement(node):
-	pass		
+	#pass
+	def __init__(self, t):
+		self.tokens = t.asList()
+		self.t = t
+		
+		#Check for assignment statement & grab name
+		
+		print self.tokens
+		raw_input()
+		a = t[0].traverse_to('Name')
+		a.type = 'NUM'
+		print a.type
+		raw_input()
+		print t[0].get_child_str()
+		raw_input()
+		
+		#type_tokens = map(lambda x : type(x), self.tokens)
+		#print type_tokens
+		#raw_input()
+		'''
+		
+		if type(Name()) in type_tokens:
+			x = type_tokens.index(type(Name()))
+			print x
+			if type_tokens[-1] == type(Name()):
+				self.t[x].type = 'NUM'
+			else:
+				self.t[x].type = 'STRING'
+		'''
+				
 class PrintStatement(node):
 	pass		
 class DeleteStatement(node):
@@ -136,7 +177,9 @@ class ArithmeticExpression(node):
 class Atom(node):
 	pass
 class Name(node):
-	pass
+	type = None
+	
+
 class String(node):
 	pass
 class Number(node):
