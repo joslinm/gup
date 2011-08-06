@@ -4,6 +4,7 @@ The base class Visitor should be inherited by all other Visitor classes. It will
 dispatching & is packaged with the necessary utility methods such as merge
 '''
 
+translate_table = {'True' : 'true', 'False': 'false'}
 #General Visitor (Should be inherited)
 class Visitor(object):
 	def __init__(self):
@@ -181,8 +182,8 @@ class PrintListVisitor(Visitor):
 		print self.tokens
 		
 		self.merge(element)
-		self.prepend('{\n')
-		self.append('\n}')
+		self.prepend(' {\n\t')
+		self.append('}\n\n')
 		
 	def visit_IfStatement(self, element):
 		print type(element).__name__
@@ -191,8 +192,8 @@ class PrintListVisitor(Visitor):
 		self.merge(element)
 		
 	def visit_ForStatement(self, element):
-		#print type(element).__name__
-		pass
+		self.merge(element)
+		
 	def visit_WhileStatement(self, element):
 		#print type(element).__name__
 		pass
@@ -215,7 +216,9 @@ class PrintListVisitor(Visitor):
 		if length == 1:
 			pass
 		elif length % 2 == 0:
+			element[0] = 'printf('
 			self.merge(element)
+			self.append(')')
 		
 	def visit_FunctionDeclaration(self, element):
 		print type(element).__name__
@@ -253,6 +256,8 @@ class PrintListVisitor(Visitor):
 			pass
 		elif length % 3 == 0:
 			self.merge(element)
+			self.prepend('(')
+			self.append(')')
 	
 	def visit_Atom(self, element):
 		pass
@@ -265,8 +270,12 @@ class PrintListVisitor(Visitor):
 	def visit_Name(self, element):
 		print type(element).__name__
 		print element
-		
-		self.tokens.append(element[0])
+		if element.type == 'NUM':
+			self.tokens.append('int ' + element[0])
+		elif element.type == 'STRING':
+			self.tokens.append('char [250] ' + element[0])
+		else:	
+			self.tokens.append(element[0])
 	def visit_String(self, element):
 		print type(element).__name__
 		print element

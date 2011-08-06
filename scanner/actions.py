@@ -104,7 +104,6 @@ class ExpressionStatement(node):
 		self.t = t
 		self.check_assignment()
 		
-		
 	#Check for assignment statement & grab name
 	def check_assignment(self):
 		if self.t[1] == '=':
