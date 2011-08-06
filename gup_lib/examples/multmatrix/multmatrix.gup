@@ -21,12 +21,17 @@ for i to width * height:
 	inMatrix2[i] = i
 	outMatrix[i] = 0
 
-inMem1 = newReadFloatBuffer(width * height, inMatrix1)
-inMem1 = input_buffer(array, width * height, 'float')
+inMemA = input_buffer(array, width * height, 'float')
+inMemB = input_buffer(array, width * height, 'float')
+outMem = output_buffer(array, width * height, 'float')
 
-'''
-inMem2 = 
-outMem = 
-'''
+setArgs(multMatrix, outMem, inMemA, inMemB, width, width)
 
-setArg
+enqueue2DRange(multMatrix, global, local)
+
+waitForFinish()
+
+outMatrix = readBuffer(outMem, width * height)
+
+file = open('output.txt', 'w')
+file.write(outMatrix)
