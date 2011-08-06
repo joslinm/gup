@@ -1,15 +1,3 @@
-/* IN GUP
-
-@kernel
-xor_encrypt(key, in, out, index, rounds):
-	keySize = globalId(0)
-	dataSize = globalId(1)
-	k = index * keySize
-	for i in range(keyLength * rounds - 1):
-		if dataSize <= k + i break
-		out[k + i] = in[k + i] ^ key[i % size]
-
-*/
 
 // Simple XOR Encryption
 __kernel void
