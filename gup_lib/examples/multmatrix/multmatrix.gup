@@ -1,0 +1,32 @@
+@kernel
+multMatrix(out, inA, inB, widthA, widthB):
+	x = get_global_id(0);
+	y = get_global_id(1);
+	sum = 0;
+	for i=0 to widthA - 1:
+		sum += inA[y * widthA + i] * inB[i * widthB + x];
+	out[y * widthA + x] = sum;
+
+width = 32
+height = 32
+global = [width, height]
+local = [8, 8]
+
+inMatrix1 = []
+inMatrix2 = []
+outMatrix = []
+
+for i to width * height:
+	inMatrix1[i] = i
+	inMatrix2[i] = i
+	outMatrix[i] = 0
+
+inMem1 = newReadFloatBuffer(width * height, inMatrix1)
+inMem1 = input_buffer(array, width * height, 'float')
+
+'''
+inMem2 = 
+outMem = 
+'''
+
+setArg
