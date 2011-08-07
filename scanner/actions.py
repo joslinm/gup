@@ -53,7 +53,21 @@ class node(object):
 				return self.t[0].traverse_to(obj_name)
 		except:
 			return None
-		
+	
+	def count_nodes(self, obj_name, count=0):
+		try:
+			for x in self.t:
+				if type(x).__name__ == obj_name:
+					count += 1
+				else:
+					try:
+						count += x.count_nodes(obj_name, count)
+					except:
+						count += 0
+			return count
+		except:
+			return 0 
+	
 	def accept(self, visitor):
 		for t in self.tokens:
 			try:

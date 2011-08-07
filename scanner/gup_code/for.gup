@@ -1,3 +1,4 @@
+a = "hello world"
 for x=0 to 100:
 	print "sup"
 	f = 19 + 5 + 2 + 100

@@ -164,7 +164,20 @@ class PrintListVisitor(Visitor):
 	#Visit methods
 	def visit_Root(self, element):
 		print type(element).__name__
-
+		print self.name_stack
+		raw_input()
+		for name in self.name_stack:
+			var,dclrd = self.symbol_table[name]
+			print var
+			print dclrd
+			print var + ' ' + name  + ';\n'
+			raw_input()
+			if not dclrd:
+				self.tokens.insert(0, "%s %s;\n" % (var,name))
+		
+		print self.tokens
+		raw_input()
+		del self.name_stack
 	def visit_Statement(self,element):
 		print type(element).__name__
 		print element
@@ -189,18 +202,22 @@ class PrintListVisitor(Visitor):
 		print self.tokens
 		
 		declarations = ''
-		while len(self.name_stack) > 0:
-			name = self.name_stack.pop()
-			var, declrd = self.symbol_table[name]
-			if not declrd:
-				declarations += ' '.join([var,name]) + ';\n'
+		x = element.count_nodes('ExpressionStatement')
+		print x
+		raw_input()
+		if x > 0:
+			for y in range(x):
+				name = self.name_stack.pop()
+				var, declrd = self.symbol_table[name]
+				if not declrd:
+					declarations += ' '.join([var,name]) + ';\n'
 		
 		print declarations
 		raw_input()
 		self.merge(element)
 		self.prepend(' {\n%s' % declarations)
 		self.append('}\n\n')
-		
+
 	def visit_IfStatement(self, element):
 		print type(element).__name__
 		print element
