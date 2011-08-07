@@ -11,6 +11,7 @@ class Visitor(object):
 	def __init__(self):
 		self.tokens = []
 		self.kernels = []
+		self.kernel_stack = []
 		self.name_stack = []
 		import actions
 		self.symbols = actions.symbol_table
@@ -172,10 +173,66 @@ class PrintListVisitor(Visitor):
 					declarations += '%s %s ;\n' % (x['type'], y)
 				print declarations
 				#raw_input()
-		print self.tokens
+		if len(self.kernels) > 0:
+			names = []
+			declarations += 'gupKernelCount = %s\n' % len(self.kernel_stack)
+			declarations += 'gupKernelNames = (char**) malloc(sizeof(int*) * gupKernelCount);\n'
+			for x in self.kernels:
+				names.append(self.kernel_stack.pop())
+			for x in range(len(names)):
+				declarations += 'gupKernelNames[%s] = %s\n' % (x, names[x])
+			
+			declarations += 'gupInitDevice();\n'
+			declarations += 'gupInitKernels();\n'
+			
+			declarations += '''
+const int width = 32;
+const int height = 32;
+	
+printf("Initializing matrices...");
+gup_matrix inputMatrix1 = newMatrix(width*height);
+gup_matrix inputMatrix2 = newMatrix(width*height);
+gup_matrix multMatrix = newMatrix(width*height);
+gup_matrix multMatrix2 = newMatrix(width*height);
+int i;
+for(i=0;i<width*height;i++) {
+	inputMatrix1[i] = i / 100.0f;
+	inputMatrix2[i] = i / 100.0f;
+	multMatrix[i] = 0;
+	multMatrix2[i] = 0;
+}
+	
+printf("Memory stuff...");
+
+cl_mem input_buffer1 = newReadFloatBuffer(height*width, inputMatrix1);
+cl_mem input_buffer2 = newReadFloatBuffer(height*width, inputMatrix2);
+cl_mem output_buffer = newWriteFloatBuffer(height*width);
+size_t global[2] = {width, height};
+size_t local[2] = {BLOCK_SIZE, BLOCK_SIZE};
+	
+cl_int err;
+for(i=0;i<gupKernelCount;i++) {
+	if (clSetKernelArg(gupKernels[i], 0, sizeof(cl_mem), &output_buffer) ||
+		clSetKernelArg(gupKernels[i], 1, sizeof(cl_mem), &input_buffer1) ||
+		clSetKernelArg(gupKernels[i], 2, sizeof(cl_mem), &input_buffer2) ||
+		clSetKernelArg(gupKernels[i], 3, sizeof(cl_uint), &width) ||
+		clSetKernelArg(gupKernels[i], 4, sizeof(cl_uint), &height) != CL_SUCCESS) {
+		printf("Unable to set kernel arguments. Error Code=%d",err);
+		exit(1);
+	}
+}
+'''
+				
+		print declarations
 		raw_input()
 		if len(declarations) > 0:
 			self.tokens.insert(0,declarations)
+			if len(self.kernels) > 0:
+				self.tokens.insert(0,
+				"#include <gupstd.h>\n" +
+				"#define BLOCK_SIZE 8\n" +
+				"int main() {\n")
+				self.tokens.append('gupClean();\n return 0;\n}')
 	def visit_Statement(self,element):
 		print type(element).__name__
 		print element
@@ -279,7 +336,36 @@ class PrintListVisitor(Visitor):
 		func_ = '{0}({1})'.format(func_name, ','.join(params))
 		
 		if func['kernel']:
-			kernel_call = 'enqueue2DRange(%s)' % func_.strip('()')
+			kernel_call = '''
+clReleaseMemObject(input_buffer1);
+clReleaseMemObject(input_buffer2);
+clReleaseMemObject(output_buffer);
+
+free(inputMatrix1);
+free(inputMatrix2);
+free(multMatrix);
+free(multMatrix2);
+	
+inputMatrix1 = newMatrix(width*height);
+inputMatrix2 = newMatrix(width*height);
+multMatrix = newMatrix(width*height);
+multMatrix2 = newMatrix(width*height);
+
+for(i=0;i<width*height;i++) {
+	inputMatrix1[i] = i / 100.0f;
+	inputMatrix2[i] = i / 100.0f;
+	multMatrix[i] = 0;
+	multMatrix2[i] = 0;
+}
+	
+input_buffer1 = newReadFloatBuffer(height*width, inputMatrix1);
+input_buffer2 = newReadFloatBuffer(height*width, inputMatrix2);
+output_buffer = newWriteFloatBuffer(height*width);
+gupEnqueue2DRangeKernel("%s", global, local);
+gupFinish();
+readFloatBuffer(output_buffer, width*height, multMatrix)
+''' % func_.strip('();')
+		#Have to leave off ending semicolon because small_stmt puts that in
 			self.tokens.append(kernel_call)
 		else:
 			self.tokens.append(func_)
@@ -302,7 +388,7 @@ class PrintListVisitor(Visitor):
 		
 		stmt = stmt_pre + stmt.lstrip(' { \n')
 		self.kernels.append(kernel_decl.lstrip(' \t \n') + stmt)
-		
+		self.kernel_stack.append(name)
 		
 	def visit_FunctionDeclaration(self, element):
 		print type(element).__name__

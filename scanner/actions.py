@@ -160,7 +160,6 @@ class KernelDeclaration(node):
 		self.t = t
 		self.tokens = t.asList()
 		self.functions = functions
-		
 		self.t[1].assign_kernel()
 
 		
