@@ -13,7 +13,7 @@ class Visitor(object):
 		self.kernels = []
 		self.name_stack = []
 		import actions
-		self.symbol_table = actions.symbol_table
+		self.symbols = actions.symbol_table
 		self.functions = actions.functions
 		
 	#General dispatch method
@@ -165,12 +165,17 @@ class PrintListVisitor(Visitor):
 	#Visit methods
 	def visit_Root(self, element):
 		print type(element).__name__
-		for name in self.name_stack:
-			var,dclrd = self.symbol_table[name]
-			if not dclrd:
-				self.tokens.insert(0, "%s %s;\n" % (var,name))
-		
-		del self.name_stack
+		declarations = ''
+		for y,x in self.symbols.iteritems():
+			if  1 == x['scope']:
+				if not x['declared']:
+					declarations += '%s %s ;\n' % (x['type'], y)
+				print declarations
+				#raw_input()
+		print self.tokens
+		raw_input()
+		if len(declarations) > 0:
+			self.tokens.insert(0,declarations)
 	def visit_Statement(self,element):
 		print type(element).__name__
 		print element
@@ -193,20 +198,15 @@ class PrintListVisitor(Visitor):
 		print type(element).__name__
 		print element
 		print self.tokens
-		print self.name_stack
-
+		print self.symbols
+		raw_input()
 		declarations = ''
-		x = element.count_nodes('ExpressionStatement')
+		for y,x in self.symbols.iteritems():
+			if element.hash == x['scope']:
+				if not x['declared']:
+					declarations += '%s %s ;\n' % (x['type'], y)
+					self.symbols[y]['declared'] = True
 		
-		if x > 0:
-			for y in range(x):
-				name = self.name_stack.pop()
-				if name.startswith('output') or name.startswith('input'):
-					continue
-				var, declrd = self.symbol_table[name]
-				if not declrd:
-					declarations += ' '.join([var,name]) + ';\n'
-			
 		self.merge(element)
 		self.prepend(' {\n%s' % declarations)
 		self.append('}\n\n')
@@ -292,16 +292,16 @@ class PrintListVisitor(Visitor):
 		stmt = self.tokens.pop()
 		name = self.tokens.pop()
 		kernel_decl = '''
-		__kernel void %s(__global float *mO, __global float *mA, 
-							   __global float *mB, uint widthA, uint widthB)
+		__kernel void %s(__global float *output, __global float *inputA, 
+							   __global float *inputB, uint widthA, uint widthB)
 		'''	 % name						   
 		stmt_pre = '''{
-		int globalIdx = get_global_id(0);
-		int globalIdy = get_global_id(1);
+	int globalIdx = get_global_id(0);
+	int globalIdy = get_global_id(1);
 		'''
 		
 		stmt = stmt_pre + stmt.lstrip(' { \n')
-		self.tokens.append(kernel_decl.lstrip(' \t \n') + stmt)
+		self.kernels.append(kernel_decl.lstrip(' \t \n') + stmt)
 		
 		
 	def visit_FunctionDeclaration(self, element):
@@ -376,7 +376,6 @@ class PrintListVisitor(Visitor):
 		if element[0] == 'output':
 			self.tokens.append('output[globalIdy * widthA + globalIdx]')
 			print self.tokens
-			
 		else:
 			self.tokens.append(element[0])
 	def visit_String(self, element):

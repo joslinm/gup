@@ -15,7 +15,6 @@ NOTES
     http://packages.python.org/pyparsing --> pyparsing.Forward)
 '''
 
-
 ParserElement.setDefaultWhitespaceChars(" \t")
 #------------------------------------------------#
 # E L E M E N T S
@@ -141,8 +140,8 @@ test = Forward()('test')#.setParseAction(actions.Test)
 testlist_comp = Forward()('testlist_comp')
 testlist1 = Forward()('testlist1')
 atom = ((LPAREN + testlist_comp + RPAREN) \
-       ^ (TICK + testlist1 + TICK)
-       ^ (( (NotAny(reserves) + NAME ) | NUM | OneOrMore(STRING))))('atom').setParseAction(actions.Atom)
+	   ^ (TICK + testlist1 + TICK)
+	   ^ (( (NotAny(reserves) + NAME ) | NUM | OneOrMore(STRING))))('atom').setParseAction(actions.Atom)
 	   
 #Expr node is a building block of many grammars
 #[depends on #Argument Lists] => *Forwards trailer

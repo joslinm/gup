@@ -11,7 +11,11 @@ TODO
 '''
 
 #SYMBOL TABLE
-symbol_table = {'output': ('float',1),'inputA': ('float',1), 'inputB':('float',1)}
+symbol_table = {
+				'output': {'type':'float', 'declared':True, 'scope':-1}
+				,'inputA': {'type':'float', 'declared':True, 'scope':-1}
+				, 'inputB':{'type':'float', 'declared':True, 'scope':-1}
+}
 functions = {}
 
 #Bare class to define functions with
@@ -45,12 +49,32 @@ class node(object):
 		else:
 			return self.t[0]
 	
-	def traverse_to(self, obj_name):
+	#Give children variables a unique virus
+	def plague_children_vars(self, virus):
 		try:
-			if obj_name == type(self).__name__:
+			for t in self.t:
+				if type(t).__name__ == 'ExpressionStatement':
+					name = t.find_child('Name')
+					self.symbols[name[0]]['scope'] = virus
+				else:
+					try:
+						name = t.find_child('Name', 'Suite')
+						if name:
+							self.symbols[name[0]]['scope'] = virus
+					except:
+						continue
+		except:
+			pass
+
+	#Looks linearly
+	def find_child(self, obj_name, stop_name=None):
+		try:
+			if stop_name == type(self).__name__:
+				return None
+			elif obj_name == type(self).__name__:
 				return self
 			else:
-				return self.t[0].traverse_to(obj_name)
+				return self.t[0].find_child(obj_name)
 		except:
 			return None
 	
@@ -79,8 +103,9 @@ class node(object):
 
 #[ROOT]
 class Root(node): 
-	#(stmt | NEWLINE)*
-	pass
+	def __init__(self,t):
+		node.__init__(self,t)
+		self.plague_children_vars(1)
 
 ##[STMT]
 class Statement(node): 
@@ -99,7 +124,8 @@ class CompoundStatement(node):
 #Simple Statement --> 4th level: small_stmt
 ####		
 class SmallStatement(node):
-	pass
+	def __init__(self, t):
+		node.__init__(self, t)
 	
 ####
 #Compound Statement --> 4th level: if|while|for|funcdef|classdef|decorated
@@ -160,21 +186,28 @@ class ExpressionStatement(node):
 	#Check for assignment statement & grab name
 	def check_assignment(self):
 		if self.t[1] == '=':
-			search_obj = self.t[2].traverse_to
-			name_obj = self.t[0].traverse_to('Name')
+			wand = self.t[2].find_child
+			name_obj = self.t[0].find_child('Name')
 			name = name_obj[0]
-			
-			if search_obj('Number'):
-				self.symbols[name] = ('float ',0)
-			elif search_obj('String'):
-				self.symbols[name] = ('char[250] ',0)
-			elif search_obj('Name')[0] in self.symbols:
-				self.symbols[name] = (self.symbols[search_obj('Name')[0]][0], 0)		
+
+			if wand('Number'):
+				self.symbols[name] = {'type':'float', 'declared':False, 'scope':0}
+			elif wand('String'):
+				self.symbols[name] = {'type':'char[250]', 'declared':False, 'scope':0}
+			elif wand('Name')[0] in self.symbols:
+				dict = self.symbols[wand('Name')[0]].copy()
+				print dict
+				print name
+				print self.symbols
+				if name in self.symbols:
+					raw_input()
+					return
+				else:
+					dict['declared'] = False
+					dict['scope'] = 0
+					self.symbols[name] = dict
 			else:
-				self.symbols[name] = ('unknown',0)
-			
-			name_obj.type = self.symbols[name_obj[0]]
-			return name_obj.type
+				raise Exception("Unknown variable right hawre: %s" % name)
 		else:
 			return None
 
@@ -211,7 +244,11 @@ class ReturnStatement(node):
 #NOTE: Consider turning if test: while test: for x in y: def NAME parameters: into their respective branch classes
 ####
 class Suite(node): #(small_stmt ^ compound_stmt)
-	pass
+	def __init__(self, t):
+		node.__init__(self, t)
+		self.hash = hash(self)
+		self.plague_children_vars(self.hash)
+
 class Parameters(node):
 	pass
 
@@ -239,7 +276,6 @@ class Name(node):
 	type = None
 	def __init__(self,t):
 		node.__init__(self,t)
-		
 		#Catch reserved words
 		if self[0] in self.symbols:
 			self.type = self.symbols[self[0]]
