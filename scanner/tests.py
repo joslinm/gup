@@ -123,6 +123,7 @@ def test_files(file=None):
 	if file:
 		tokens = grammar.file_input.parseFile(file)
 		print tokens.asList()
+		print tokens.asList()[0]
 		import visitors
 		pl = visitors.PrintListVisitor()
 		

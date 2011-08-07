@@ -11,15 +11,25 @@ TODO
 '''
 
 #SYMBOL TABLE
-symbol_table = {}
+symbol_table = {'inputA': ('float',1), 'inputB':('float',1), 'output':('cl_mem',1)}
+functions = {}
 
+#Bare class to define functions with
+class function(object):
+	def __init__(self, name, num_param, kernel):
+		self.name = name
+		self.num_param = num_param
+		self.kernel = kernel
+	
 # Defines node methods & accept, each node inherits node 
 # and does not have to define any methods of its own
 class node(object):
 	def __init__(self,t):
-		global symbol_table
+		global symbol_table, functions
 		self.t = t
 		self.tokens = t.asList()
+		self.symbols = symbol_table
+		self.functions = functions
 	def __str__(self):
 		return str(self.t)
 	def __getitem__(self, index):
@@ -79,7 +89,9 @@ class SmallStatement(node):
 	
 ####
 #Compound Statement --> 4th level: if|while|for|funcdef|classdef|decorated
-####				
+####	
+class Parameters(node):
+	pass
 class IfStatement(node):
 	pass
 class ForStatement(node):
@@ -87,10 +99,34 @@ class ForStatement(node):
 class WhileStatement(node):
 	pass
 class FunctionDeclaration(node):
-	pass
+	def __init__(self,t):
+		global functions
+		self.t = t
+		self.tokens = t.asList()
+		self.functions = functions
+		dict = {}
+		dict['num_params'] = len(t[2])
+		dict['kernel'] = False
+		dict['name'] = t[1].get_child_str()
+		self.functions[dict['name']] = dict
+		self.dict_entry = self.functions[dict['name']]
+	def assign_kernel(self):
+		self.dict_entry['kernel'] = True
+		
+class KernelDeclaration(node):
+	def __init__(self,t):
+		global functions
+		self.t = t
+		self.tokens = t.asList()
+		self.functions = functions
+		
+		print t 
+		print self.t[1].assign_kernel()
+		print self.t[1].dict_entry
+		
 class ClassDeclaration(node):
 	pass
-class DecoratedDeclaration(node):
+class DecoratedDeclaration(node):	
 	pass
 
 ####
@@ -100,41 +136,37 @@ class DecoratedDeclaration(node):
 #Expression statement catches assignment statements & operates on the NAME
 class ExpressionStatement(node):
 	def __init__(self, t):
+		global symbol_table
+		self.symbols = symbol_table
 		self.tokens = t.asList()
 		self.t = t
 		self.check_assignment()
+		
 		
 	#Check for assignment statement & grab name
 	def check_assignment(self):
 		if self.t[1] == '=':
 			search_obj = self.t[2].traverse_to
 			name_obj = self.t[0].traverse_to('Name')
-		
+			name = name_obj[0]
+			
 			if search_obj('Number'):
-				name_obj.type = 'NUM'
+				self.symbols[name] = ('float ',0)
 			elif search_obj('String'):
-				name_obj.type = 'STRING'
+				self.symbols[name] = ('char[250] ',0)
+			elif search_obj('Name')[0] in self.symbols:
+				self.symbols[name] = self.symbols[search_obj('Name')[0]]
+				raw_input()
 			else:
-				name_obj.type = 'KEYWORD'
-				
+				self.symbols[name] = ('unknown',0)
+			
+			name_obj.type = self.symbols[name_obj[0]]
 			return name_obj.type
 		else:
 			return None
-		
-		#type_tokens = map(lambda x : type(x), self.tokens)
-		#print type_tokens
-		#raw_input()
-		'''
-		
-		if type(Name()) in type_tokens:
-			x = type_tokens.index(type(Name()))
-			print x
-			if type_tokens[-1] == type(Name()):
-				self.t[x].type = 'NUM'
-			else:
-				self.t[x].type = 'STRING'
-		'''
-				
+
+class FunctionCall(node):	
+	pass
 class PrintStatement(node):
 	pass		
 class DeleteStatement(node):
@@ -182,6 +214,9 @@ class Expression(node):
 class ArithmeticExpression(node):
 	pass
 
+	
+class Power(node):
+	pass
 ####
 #Atom --> [NAME | NUMBER | STRING]
 ####
@@ -189,7 +224,12 @@ class Atom(node):
 	pass
 class Name(node):
 	type = None
-	
+	def __init__(self,t):
+		node.__init__(self,t)
+		
+		#Catch reserved words
+		if self[0] in self.symbols:
+			self.type = self.symbols[self[0]]
 
 class String(node):
 	pass

@@ -4,11 +4,16 @@ The base class Visitor should be inherited by all other Visitor classes. It will
 dispatching & is packaged with the necessary utility methods such as merge
 '''
 
-translate_table = {'True' : 'true', 'False': 'false'}
+translate_table = {'True' : 'true', 'False': 'false'''}
+
 #General Visitor (Should be inherited)
 class Visitor(object):
 	def __init__(self):
 		self.tokens = []
+		self.name_stack = []
+		import actions
+		self.symbol_table = actions.symbol_table
+		self.functions = actions.functions
 		
 	#General dispatch method
 	def visit(self,*args):
@@ -102,6 +107,9 @@ class Visitor(object):
 
 	###
 	#Flow Statement --> pass, break, continue
+	###
+	def visit_FunctionCall(self, element):
+		pass
 	def visit_FlowStatement(self, element):
 		pass
 	def visit_ContinueStatement(self, element):
@@ -156,8 +164,7 @@ class PrintListVisitor(Visitor):
 	#Visit methods
 	def visit_Root(self, element):
 		print type(element).__name__
-		print element
-		
+
 	def visit_Statement(self,element):
 		print type(element).__name__
 		print element
@@ -181,8 +188,17 @@ class PrintListVisitor(Visitor):
 		print element
 		print self.tokens
 		
+		declarations = ''
+		while len(self.name_stack) > 0:
+			name = self.name_stack.pop()
+			var, declrd = self.symbol_table[name]
+			if not declrd:
+				declarations += ' '.join([var,name]) + ';\n'
+		
+		print declarations
+		raw_input()
 		self.merge(element)
-		self.prepend(' {\n\t')
+		self.prepend(' {\n%s' % declarations)
 		self.append('}\n\n')
 		
 	def visit_IfStatement(self, element):
@@ -192,7 +208,23 @@ class PrintListVisitor(Visitor):
 		self.merge(element)
 		
 	def visit_ForStatement(self, element):
-		self.merge(element)
+		print type(element).__name__
+		print self.tokens
+		print element
+		print self.tokens
+		
+		suite = self.tokens.pop()
+		max = self.tokens.pop()
+		min = self.tokens.pop()
+		definition = self.tokens.pop()
+		
+		for_branch = 'for (int %s = %s;' % (definition, min)
+		for_branch += '%s <= %s;' % (definition, max)
+		for_branch += '%s++)' % definition
+		for_branch += '\n%s' % suite
+		
+		self.tokens.append(for_branch)
+
 		
 	def visit_WhileStatement(self, element):
 		#print type(element).__name__
@@ -201,9 +233,11 @@ class PrintListVisitor(Visitor):
 		##e.g. COMPARISON '=' COMPARISON 
 		print type(element).__name__
 		print element
-		
+		print self.tokens
+		#raw_input()
 		length = len(element)
 		if length % 3 == 0:
+			self.name_stack.append(element[0].get_child_str())
 			self.merge(element)
 			
 	def visit_PrintStatement(self, element):
@@ -219,6 +253,26 @@ class PrintListVisitor(Visitor):
 			element[0] = 'printf('
 			self.merge(element)
 			self.append(')')
+	
+	def visit_FunctionCall(self, element):
+		print type(element).__name__
+		print element
+		print self.tokens
+
+		import actions
+		func = actions.functions[element[0].get_child_str()]
+		params = []
+		for x in range(func['num_params']):
+			params.append(self.tokens.pop())
+		params.reverse()
+		func_name = self.tokens.pop()
+		func_ = '{0}({1})'.format(func_name, ','.join(params))
+		
+		if func['kernel']:
+			kernel_call = 'enqueue2DRange(%s)' % func_.strip('()')
+			self.tokens.append(kernel_call)
+		else:
+			self.tokens.append(func_)
 		
 	def visit_FunctionDeclaration(self, element):
 		print type(element).__name__
@@ -232,8 +286,7 @@ class PrintListVisitor(Visitor):
 	def visit_Expression(self, element):
 		print type(element).__name__
 		print element
-		
-		
+		#raw_input()
 		
 	def visit_ArithmeticExpression(self, element):
 		print type(element).__name__
@@ -242,15 +295,29 @@ class PrintListVisitor(Visitor):
 		length = len(element)
 		if length == 1:
 			pass
-		elif length % 3 == 0:
+		else:
 			self.merge(element)
+	
+	def visit_Power(self, element):
+		print type(element).__name__
+		print element
+		length = len(element)
 		
+		if(length == 2):
+			trailer = self.tokens.pop()
+			name = self.tokens.pop()
+
+			if name == 'inputA':
+				self.tokens.append(name + ('[globalIdy * widthA + %s]' % trailer))
+			elif name == 'inputB':
+				self.tokens.append(name + ('[%s * widthB + globalIdx' % trailer))
+
+			
 	def visit_Comparison(self, element):
 		print type(element).__name__
 		print element
 		print len(element)
 		length = len(element)
-		
 
 		if length == 1:
 			pass
@@ -264,17 +331,14 @@ class PrintListVisitor(Visitor):
 	def visit_Number(self, element):
 		print type(element).__name__
 		print element
-		
-		#print element
 		self.tokens.append(element[0])
 	def visit_Name(self, element):
 		print type(element).__name__
 		print element
-		if element.type == 'NUM':
-			self.tokens.append('int ' + element[0])
-		elif element.type == 'STRING':
-			self.tokens.append('char [250] ' + element[0])
-		else:	
+		print element.type
+		if element[0] == 'output':
+			self.tokens.append('output[globalIdy * widthA + globalIdx]')
+		else:
 			self.tokens.append(element[0])
 	def visit_String(self, element):
 		print type(element).__name__

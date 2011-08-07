@@ -17,12 +17,7 @@ else:
 	print "huh?!"
 
 
-if True:
+if x > 11:
 	print "Stay true."
 else:
 	print "hello"
-	
-if y >= x:
-	hello = True
-else:
-	hello = False
