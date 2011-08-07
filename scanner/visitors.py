@@ -292,16 +292,16 @@ class PrintListVisitor(Visitor):
 		stmt = self.tokens.pop()
 		name = self.tokens.pop()
 		kernel_decl = '''
-		__kernel void %s(__global float *mO, __global float *mA, 
-							   __global float *mB, uint widthA, uint widthB)
+		__kernel void %s(__global float *output, __global float *inputA, 
+							   __global float *inputB, uint widthA, uint widthB)
 		'''	 % name						   
 		stmt_pre = '''{
-		int globalIdx = get_global_id(0);
-		int globalIdy = get_global_id(1);
+	int globalIdx = get_global_id(0);
+	int globalIdy = get_global_id(1);
 		'''
 		
 		stmt = stmt_pre + stmt.lstrip(' { \n')
-		self.tokens.append(kernel_decl.lstrip(' \t \n') + stmt)
+		self.kernels.append(kernel_decl.lstrip(' \t \n') + stmt)
 		
 		
 	def visit_FunctionDeclaration(self, element):
