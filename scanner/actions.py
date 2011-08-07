@@ -11,7 +11,7 @@ TODO
 '''
 
 #SYMBOL TABLE
-symbol_table = {'inputA': ('float',1), 'inputB':('float',1), 'output':('cl_mem',1)}
+symbol_table = {'output': ('float',1),'inputA': ('float',1), 'inputB':('float',1)}
 functions = {}
 
 #Bare class to define functions with
@@ -56,12 +56,12 @@ class node(object):
 	
 	def count_nodes(self, obj_name, count=0):
 		try:
-			for x in self.t:
+			for x in self.t:			
 				if type(x).__name__ == obj_name:
 					count += 1
 				else:
 					try:
-						count += x.count_nodes(obj_name, count)
+						count = x.count_nodes(obj_name, count)
 					except:
 						count += 0
 			return count
@@ -126,6 +126,7 @@ class FunctionDeclaration(node):
 		self.dict_entry = self.functions[dict['name']]
 	def assign_kernel(self):
 		self.dict_entry['kernel'] = True
+		self.functions[self.dict_entry['name']] = self.dict_entry
 		
 class KernelDeclaration(node):
 	def __init__(self,t):
@@ -134,9 +135,8 @@ class KernelDeclaration(node):
 		self.tokens = t.asList()
 		self.functions = functions
 		
-		print t 
-		print self.t[1].assign_kernel()
-		print self.t[1].dict_entry
+		self.t[1].assign_kernel()
+
 		
 class ClassDeclaration(node):
 	pass
@@ -169,8 +169,7 @@ class ExpressionStatement(node):
 			elif search_obj('String'):
 				self.symbols[name] = ('char[250] ',0)
 			elif search_obj('Name')[0] in self.symbols:
-				self.symbols[name] = self.symbols[search_obj('Name')[0]]
-				raw_input()
+				self.symbols[name] = (self.symbols[search_obj('Name')[0]][0], 0)		
 			else:
 				self.symbols[name] = ('unknown',0)
 			

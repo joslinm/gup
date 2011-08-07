@@ -10,6 +10,7 @@ translate_table = {'True' : 'true', 'False': 'false'''}
 class Visitor(object):
 	def __init__(self):
 		self.tokens = []
+		self.kernels = []
 		self.name_stack = []
 		import actions
 		self.symbol_table = actions.symbol_table
@@ -37,7 +38,7 @@ class Visitor(object):
 				a = self.tokens.pop()
 				if debug:
 					print "Popping " + a
-					raw_input()
+					
 				element[x] = a
 		r = ' '.join(element)
 		self.tokens.append(r)
@@ -164,19 +165,11 @@ class PrintListVisitor(Visitor):
 	#Visit methods
 	def visit_Root(self, element):
 		print type(element).__name__
-		print self.name_stack
-		raw_input()
 		for name in self.name_stack:
 			var,dclrd = self.symbol_table[name]
-			print var
-			print dclrd
-			print var + ' ' + name  + ';\n'
-			raw_input()
 			if not dclrd:
 				self.tokens.insert(0, "%s %s;\n" % (var,name))
 		
-		print self.tokens
-		raw_input()
 		del self.name_stack
 	def visit_Statement(self,element):
 		print type(element).__name__
@@ -200,20 +193,20 @@ class PrintListVisitor(Visitor):
 		print type(element).__name__
 		print element
 		print self.tokens
-		
+		print self.name_stack
+
 		declarations = ''
 		x = element.count_nodes('ExpressionStatement')
-		print x
-		raw_input()
+		
 		if x > 0:
 			for y in range(x):
 				name = self.name_stack.pop()
+				if name.startswith('output') or name.startswith('input'):
+					continue
 				var, declrd = self.symbol_table[name]
 				if not declrd:
 					declarations += ' '.join([var,name]) + ';\n'
-		
-		print declarations
-		raw_input()
+			
 		self.merge(element)
 		self.prepend(' {\n%s' % declarations)
 		self.append('}\n\n')
@@ -251,7 +244,7 @@ class PrintListVisitor(Visitor):
 		print type(element).__name__
 		print element
 		print self.tokens
-		#raw_input()
+		#
 		length = len(element)
 		if length % 3 == 0:
 			self.name_stack.append(element[0].get_child_str())
@@ -290,11 +283,38 @@ class PrintListVisitor(Visitor):
 			self.tokens.append(kernel_call)
 		else:
 			self.tokens.append(func_)
+	
+	def visit_KernelDeclaration(self, element):
+		print type(element).__name__
+		print element
+		print self.tokens
+		#[NAME, STMT]
+		stmt = self.tokens.pop()
+		name = self.tokens.pop()
+		kernel_decl = '''
+		__kernel void %s(__global float *mO, __global float *mA, 
+							   __global float *mB, uint widthA, uint widthB)
+		'''	 % name						   
+		stmt_pre = '''{
+		int globalIdx = get_global_id(0);
+		int globalIdy = get_global_id(1);
+		'''
+		
+		stmt = stmt_pre + stmt.lstrip(' { \n')
+		self.tokens.append(kernel_decl.lstrip(' \t \n') + stmt)
+		
 		
 	def visit_FunctionDeclaration(self, element):
 		print type(element).__name__
-		pass
-	
+		print element
+		print self.tokens
+		
+		if self.functions[self.tokens[0]]['kernel']:
+			print "is kernel"
+			pass
+		else:
+			pass#Compute stuff here
+
 	def visit_Test(self, element):
 		print type(element).__name__
 		print element
@@ -303,7 +323,6 @@ class PrintListVisitor(Visitor):
 	def visit_Expression(self, element):
 		print type(element).__name__
 		print element
-		#raw_input()
 		
 	def visit_ArithmeticExpression(self, element):
 		print type(element).__name__
@@ -327,7 +346,7 @@ class PrintListVisitor(Visitor):
 			if name == 'inputA':
 				self.tokens.append(name + ('[globalIdy * widthA + %s]' % trailer))
 			elif name == 'inputB':
-				self.tokens.append(name + ('[%s * widthB + globalIdx' % trailer))
+				self.tokens.append(name + ('[%s * widthB + globalIdx]' % trailer))
 
 			
 	def visit_Comparison(self, element):
@@ -353,8 +372,11 @@ class PrintListVisitor(Visitor):
 		print type(element).__name__
 		print element
 		print element.type
+		
 		if element[0] == 'output':
 			self.tokens.append('output[globalIdy * widthA + globalIdx]')
+			print self.tokens
+			
 		else:
 			self.tokens.append(element[0])
 	def visit_String(self, element):
