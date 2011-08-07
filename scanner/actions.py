@@ -11,11 +11,11 @@ TODO
 '''
 
 #SYMBOL TABLE
-symbol_table = [
-				{'name': 'output', 'type':'float', 'declared':True, 'scope':-1}
-				{'name': 'inputA', 'type':'float', 'declared':True, 'scope':-1}
-				{'name': 'inputB', 'type':'float', 'declared':True, 'scope':-1}
-]
+symbol_table = {
+				'output': {'type':'float', 'declared':True, 'scope':-1},
+				'inputA': {'type':'float', 'declared':True, 'scope':-1},
+				'inputB': {'type':'float', 'declared':True, 'scope':-1}
+}
 functions = {}
 
 #Bare class to define functions with
@@ -199,7 +199,6 @@ class ExpressionStatement(node):
 				print name
 				print self.symbols
 				if name in self.symbols:
-					raw_input()
 					return
 				else:
 					dict['declared'] = False

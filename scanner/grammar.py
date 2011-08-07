@@ -231,7 +231,7 @@ flow_stmt = (break_stmt ^ continue_stmt ^ return_stmt) ('flow_stmt').setParseAct
 #Class Declarations [depends on #Block Statements]
 classdef = (_class + NAME + Optional(LPAREN + testlist + RPAREN) + COLON + suite)('classdef').setParseAction(actions.ClassDeclaration)
 decorator_kernel = (KERNELDEC + Optional(LPAREN + arglist + RPAREN) + NEWLINE)('decorator_kernel')
-decorated = (decorator_kernel + funcdef)('decorated').setParseAction(actions.KernelDeclaration).setDebug().setName("decorator")
+decorated = (decorator_kernel + funcdef)('decorated').setParseAction(actions.KernelDeclaration)
 
 #Other Statements
 augassign = (plusAssign ^ minusAssign ^ multAssign ^ divAssign ^ modAssign \
@@ -242,20 +242,20 @@ global_stmt = (_global + delimitedList(NAME))('global_stmt')
 assert_stmt = (_assert + delimitedList(test))('assert_stmt')
 del_stmt = (_delete + exprlist)('del_stmt').setParseAction(actions.DeleteStatement)
 print_stmt = ('print' + (delimitedList(test) + ENDCOMMA)).setParseAction(actions.PrintStatement)('print_stmt')
-func_call = (NAME + parameters).setDebug().setName('func call').setParseAction(actions.FunctionCall)
+func_call = (NAME + parameters).setParseAction(actions.FunctionCall)
 
 #Top level statements
 expr_stmt = (testlist + ZeroOrMore((augassign + testlist) ^ (assign + testlist)))('expr_stmt').setParseAction(actions.ExpressionStatement)#.setDebug().setName('expression')
 small_stmt = ( func_call ^ expr_stmt  ^ print_stmt ^ del_stmt ^ pass_stmt ^ flow_stmt \
-		^ import_stmt ^ global_stmt ^ assert_stmt)('small_stmt').setParseAction(actions.SmallStatement).setDebug().setName('small stmt')
+		^ import_stmt ^ global_stmt ^ assert_stmt)('small_stmt').setParseAction(actions.SmallStatement)
 simple_stmt << (small_stmt + ZeroOrMore(';' + small_stmt) \
-		+ Optional(SEMICOLON) + NEWLINE).setParseAction(actions.SimpleStatement).setDebug().setName("simple")
+		+ Optional(SEMICOLON) + NEWLINE).setParseAction(actions.SimpleStatement)
 compound_stmt = (if_stmt | while_stmt | for_stmt | funcdef | classdef | decorated) \
-	('compound_stmt').setParseAction(actions.CompoundStatement).setName('compound').setDebug()
+	('compound_stmt').setParseAction(actions.CompoundStatement)
 
 #suite_stmt avoids simple_stmt EOL
 suite_stmt << (small_stmt ^ compound_stmt)
-stmt << (simple_stmt ^ compound_stmt)('stmt').setParseAction(actions.Statement).setName("stmt").setDebug()
+stmt << (simple_stmt ^ compound_stmt)('stmt').setParseAction(actions.Statement)
 
 #Top of our parser
-file_input = (ZeroOrMore(stmt | NEWLINE).parseWithTabs()).setParseAction(actions.Root).setDebug().setName('root')
+file_input = (ZeroOrMore(stmt | NEWLINE).parseWithTabs()).setParseAction(actions.Root)

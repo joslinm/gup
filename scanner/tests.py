@@ -125,7 +125,7 @@ def test_files(file=None):
 		print tokens.asList()
 		print tokens.asList()[0]
 		import visitors
-		pl = visitors.PrintListVisitor()
+		pl = visitors.TranslateVisitor()
 		
 		
 		tokens[0].accept(pl)

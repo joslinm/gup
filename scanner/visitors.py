@@ -160,7 +160,7 @@ class Visitor(object):
 	def visit_Number(self, element):
 		pass
 
-class PrintListVisitor(Visitor):
+class TranslateVisitor(Visitor):
 	import actions
 	
 	#Visit methods
@@ -172,7 +172,6 @@ class PrintListVisitor(Visitor):
 				if not x['declared']:
 					declarations += '%s %s ;\n' % (x['type'], y)
 				print declarations
-				#raw_input()
 		if len(self.kernels) > 0:
 			names = []
 			declarations += 'gupKernelCount = %s\n' % len(self.kernel_stack)
@@ -223,8 +222,6 @@ for(i=0;i<gupKernelCount;i++) {
 }
 '''
 				
-		print declarations
-		raw_input()
 		if len(declarations) > 0:
 			self.tokens.insert(0,declarations)
 			if len(self.kernels) > 0:
@@ -233,6 +230,10 @@ for(i=0;i<gupKernelCount;i++) {
 				"#define BLOCK_SIZE 8\n" +
 				"int main() {\n")
 				self.tokens.append('gupClean();\n return 0;\n}')
+			else:
+				self.tokens.insert(0,"\nint main() {\n")
+				self.tokens.append('}')
+				
 	def visit_Statement(self,element):
 		print type(element).__name__
 		print element
@@ -256,7 +257,6 @@ for(i=0;i<gupKernelCount;i++) {
 		print element
 		print self.tokens
 		print self.symbols
-		raw_input()
 		declarations = ''
 		for y,x in self.symbols.iteritems():
 			if element.hash == x['scope']:

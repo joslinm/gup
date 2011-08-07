@@ -1,8 +1,11 @@
 @kernel
 def kernely():
-	c = 5
+	d = 5
 	for y=0 to 100:
-		a = inputA[y]
+		e= inputA[y]
+		d += a
+	
+	output = d
 
 @kernel
 def kernelz():
