@@ -1,6 +1,6 @@
 // gcc sample_program.c -o sample_program -lOpenCL && ./sample_program
 
-#include "gupstd.h"
+#include <gupstd.h>
 
 #define BLOCK_SIZE 8
 
@@ -58,21 +58,15 @@ int main() {
 	/// Maybe we will just generate this based off what was in
 	/// the gup kernel function, for each kernel
 	cl_int err;
-	if (clSetKernelArg(gupKernels[0], 0, sizeof(cl_mem), &output_buffer) ||
-		clSetKernelArg(gupKernels[0], 1, sizeof(cl_mem), &input_buffer1) ||
-		clSetKernelArg(gupKernels[0], 2, sizeof(cl_mem), &input_buffer2) ||
-		clSetKernelArg(gupKernels[0], 3, sizeof(cl_uint), &width) ||
-		clSetKernelArg(gupKernels[0], 4, sizeof(cl_uint), &height) != CL_SUCCESS) {
-		printf("Unable to set kernel arguments. Error Code=%d\n",err);
-		exit(1);
-	}
-	if (clSetKernelArg(gupKernels[1], 0, sizeof(cl_mem), &output_buffer) ||
-		clSetKernelArg(gupKernels[1], 1, sizeof(cl_mem), &input_buffer1) ||
-		clSetKernelArg(gupKernels[1], 2, sizeof(cl_mem), &input_buffer2) ||
-		clSetKernelArg(gupKernels[1], 3, sizeof(cl_uint), &width) ||
-		clSetKernelArg(gupKernels[1], 4, sizeof(cl_uint), &height) != CL_SUCCESS) {
-		printf("Unable to set kernel arguments. Error Code=%d\n",err);
-		exit(1);
+	for(i=0;i<gupKernelCount;i++) {
+		if (clSetKernelArg(gupKernels[i], 0, sizeof(cl_mem), &output_buffer) ||
+			clSetKernelArg(gupKernels[i], 1, sizeof(cl_mem), &input_buffer1) ||
+			clSetKernelArg(gupKernels[i], 2, sizeof(cl_mem), &input_buffer2) ||
+			clSetKernelArg(gupKernels[i], 3, sizeof(cl_uint), &width) ||
+			clSetKernelArg(gupKernels[i], 4, sizeof(cl_uint), &height) != CL_SUCCESS) {
+			printf("Unable to set kernel arguments. Error Code=%d\n",err);
+			exit(1);
+		}
 	}
 	
 	printf("Enqueue-ing and running kernel...");

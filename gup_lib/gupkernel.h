@@ -84,6 +84,7 @@ void gupInitKernels() {
 	for(i=0;i<gupKernelCount;i++){
 		gupKernels[i] = gupCreateKernel(gupKernelNames[i]);
 	}
+	printf("FUCK\n");
 	free(gupKernelSrc);
 }
 
