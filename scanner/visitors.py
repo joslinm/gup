@@ -13,7 +13,7 @@ class Visitor(object):
 		self.kernels = []
 		self.name_stack = []
 		import actions
-		self.symbol_table = actions.symbol_table
+		self.symbols = actions.symbol_table
 		self.functions = actions.functions
 		
 	#General dispatch method
@@ -166,12 +166,14 @@ class PrintListVisitor(Visitor):
 	def visit_Root(self, element):
 		print type(element).__name__
 		declarations = ''
-		for y,x in self.symbol_table.iteritems():
+		for y,x in self.symbols.iteritems():
 			if  1 == x['scope']:
 				if not x['declared']:
 					declarations += '%s %s ;\n' % (x['type'], y)
 				print declarations
 				#raw_input()
+		print self.tokens
+		raw_input()
 		if len(declarations) > 0:
 			self.tokens.insert(0,declarations)
 	def visit_Statement(self,element):
@@ -196,13 +198,14 @@ class PrintListVisitor(Visitor):
 		print type(element).__name__
 		print element
 		print self.tokens
-		print self.name_stack
-		
+		print self.symbols
+		raw_input()
 		declarations = ''
-		for y,x in self.symbol_table.iteritems():
+		for y,x in self.symbols.iteritems():
 			if element.hash == x['scope']:
-				declarations += '%s %s ;\n' % (x['type'], y)
-				self.symbol_table[y]['declared'] = 1
+				if not x['declared']:
+					declarations += '%s %s ;\n' % (x['type'], y)
+					self.symbols[y]['declared'] = True
 		
 		self.merge(element)
 		self.prepend(' {\n%s' % declarations)
@@ -373,7 +376,6 @@ class PrintListVisitor(Visitor):
 		if element[0] == 'output':
 			self.tokens.append('output[globalIdy * widthA + globalIdx]')
 			print self.tokens
-			
 		else:
 			self.tokens.append(element[0])
 	def visit_String(self, element):

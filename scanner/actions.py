@@ -195,10 +195,17 @@ class ExpressionStatement(node):
 			elif wand('String'):
 				self.symbols[name] = {'type':'char[250]', 'declared':False, 'scope':0}
 			elif wand('Name')[0] in self.symbols:
-				dict = wand('Name').type.copy()
-				dict['declared'] = False
-				dict['scope'] = 0
-				self.symbols[name] = dict
+				dict = self.symbols[wand('Name')[0]].copy()
+				print dict
+				print name
+				print self.symbols
+				if name in self.symbols:
+					raw_input()
+					return
+				else:
+					dict['declared'] = False
+					dict['scope'] = 0
+					self.symbols[name] = dict
 			else:
 				raise Exception("Unknown variable right hawre: %s" % name)
 		else:
