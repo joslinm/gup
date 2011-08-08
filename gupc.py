@@ -25,8 +25,8 @@ piler = Compiler(inputGup, inputFile)
 kernel = piler.compile()
 
 if (kernel):
-	subprocess.check_output(['gcc', inputFile, '-o', outputFile, '-lOpenCL'])
-	subprocess.check_output(["./" + outputFile])
+	subprocess.check_call(['gcc', inputFile, '-o', outputFile, '-lOpenCL'])
+	subprocess.check_call(["./" + outputFile])
 else:
-	subprocess.check_output(['gcc', inputFile, '-o', outputFile])
-	subprocess.check_output(["./" + outputFile])
+	subprocess.check_call(['gcc', inputFile, '-o', outputFile])
+	subprocess.check_call(["./" + outputFile])

@@ -4,7 +4,7 @@ int main() {
 float x ;
 x = 10;
 if (x <= 5)  {
-printf("what d you do with 5?");
+printf( "whatd you do with 5?");
  x = 5 - 4;
 }
 

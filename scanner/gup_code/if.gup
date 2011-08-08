@@ -1,7 +1,7 @@
 x = 10
 
 if x <= 5:
-    print "what'd you do with 5?" + "hello world"
+    print "whatd you do with 5?"
     x = 5 - 4
 else if x >= 5:
 	print "say 0"
