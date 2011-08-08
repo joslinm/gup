@@ -1,7 +1,8 @@
-naw #!/usr/bin/python2
+#!/usr/bin/python2
 import sys
 import subprocess
 from compiler import Compiler
+#from scanner.compiler import Compiler
 
 inputGup = ""
 inputFile = ""
