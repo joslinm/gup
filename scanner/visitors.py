@@ -327,7 +327,7 @@ for(i=0;i<gupKernelCount;i++) {
 					element[0] += ', %s)' % name_obj[0]
 					self.tokens.pop() #remove test off the rhs
 					self.tokens.append(element[0])
-				elif self.symbols[name_obj[0]['type'] == 'float':
+				elif self.symbols[name_obj[0]]['type'] == 'float':
 					element[0] = 'printf("%f"'
 					element[0] += ', %s)' % name_obj[0]
 					self.tokens.pop() #remove test off the rhs

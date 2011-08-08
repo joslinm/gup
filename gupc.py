@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python27
 import sys
 import subprocess
 from compiler import Compiler
