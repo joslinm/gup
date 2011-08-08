@@ -170,10 +170,7 @@ class TranslateVisitor(Visitor):
 		for y,x in self.symbols.iteritems():
 			if  1 == x['scope']:
 				if not x['declared']:
-					if x['type'] == 'char[250]':
-						declarations += '%s %s = %s;\n' % (x['type'], y, x['value'])
-					else:
-						declarations += '%s %s ;\n' % (x['type'], y)
+					declarations += '%s %s ;\n' % (x['type'], y)
 				print declarations
 		if len(self.kernels) > 0:
 			names = []
@@ -267,8 +264,6 @@ for(i=0;i<gupKernelCount;i++) {
 		for y,x in self.symbols.iteritems():
 			if element.hash == x['scope']:
 				if not x['declared']:
-					if x['type'] == 'char[250]':
-						declarations += '%s %s = %s' % (x['type'], y, x['value'])
 					declarations += '%s %s ;\n' % (x['type'], y)
 					self.symbols[y]['declared'] = True
 		
@@ -337,6 +332,10 @@ for(i=0;i<gupKernelCount;i++) {
 					element[0] += ', %s)' % name_obj[0]
 					self.tokens.pop() #remove test off the rhs
 					self.tokens.append(element[0])
+				else:
+					element[0] = 'printf('
+					self.merge(element)
+					self.append(')')
 			else:
 				element[0] = 'printf('
 				self.merge(element)

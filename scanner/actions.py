@@ -194,7 +194,7 @@ class ExpressionStatement(node):
 			if wand('Number'):
 				self.symbols[name] = {'type':'float', 'declared':False, 'scope':0}
 			elif wand('String'):
-				self.symbols[name] = {'type':'char[250]', 'declared':False, 'scope':0, 'value': self.t[2].get_child_str()}
+				self.symbols[name] = {'type':'char*', 'declared':False, 'scope':0, 'value': self.t[2].get_child_str()}
 			elif wand('Name')[0] in self.symbols:
 				dict = self.symbols[wand('Name')[0]].copy()
 				print dict
