@@ -275,6 +275,8 @@ class Name(node):
 			self.type = self.symbols[self[0]]
 
 class String(node):
-	pass
+	def __init__(self,t):
+		node.__init__(self,t)
+		self.t[0] = self.t[0].replace("'", '"')
 class Number(node):
 	pass
