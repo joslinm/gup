@@ -231,7 +231,10 @@ for(i=0;i<gupKernelCount;i++) {
 				"int main() {\n")
 				self.tokens.append('gupClean();\n return 0;\n}')
 			else:
-				self.tokens.insert(0,"\nint main() {\n")
+				self.tokens.insert(0, 
+				"#include <stdio.h>\n" + 
+				"#include <stdlib.h>\n" +
+				"int main() {\n")
 				self.tokens.append('}')
 				
 	def visit_Statement(self,element):
