@@ -1,5 +1,7 @@
+x = 10
+
 if x <= 5:
-    print "what'd you do with 5?"
+    print "what'd you do with 5?" + "hello world"
     x = 5 - 4
 else if x >= 5:
 	print "say 0"
@@ -7,7 +9,7 @@ else if x >= 5:
 		print "1!"
 	else if  x > 3:
 		print "2!"
-	elif x > 4:
+	else if x > 4:
 		print '3!'
 	else:
 		print '4!'
@@ -15,12 +17,7 @@ else:
 	print "huh?!"
 
 
-if True:
+if x > 11:
 	print "Stay true."
 else:
 	print "hello"
-	
-if y >= x:
-	hello = True
-else:
-	hello = False

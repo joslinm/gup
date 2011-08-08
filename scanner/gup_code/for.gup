@@ -1,6 +1,7 @@
-for x in range(10):
+a = "hello world"
+for x=0 to 100:
 	print "sup"
-	print x * 5 * 1 / 5
+	f = 19 + 5 + 2 + 100
 
-for x in y:
+for y=0 to 250:
 	print x

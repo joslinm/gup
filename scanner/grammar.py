@@ -4,8 +4,7 @@ import actions
 '''
 -----
 GUP.scanner.grammar
-This module will be imported into scanner.py and holds our CFG grammar
-(heavily influenced by Python)
+This module will be imported into scanner.py and holds our (/Python's) CFG grammar
 -----
 NOTES
 - Keyword('if') will NOT match ("ifsomething") but WILL match ("[if] something")
@@ -14,15 +13,7 @@ NOTES
 - Forward is used to define grammars that are recursive and need to be defined
     temporarily (see pgs. 36 - 37 in `Getting Started With Pyparsing` as well as
     http://packages.python.org/pyparsing --> pyparsing.Forward)
-TODO
-- Hook up parse actions 					[ ]
-- Match names with _						[ ]
-
-XXX
-- `suite` is unable to match consecutive		[ ]
-	lines in a row
 '''
-
 
 ParserElement.setDefaultWhitespaceChars(" \t")
 #------------------------------------------------#
@@ -46,12 +37,6 @@ NAME = Word(alphas)("NAME").setParseAction(actions.Name)
 NUM = (Word(nums) + Optional(DOT + Word(nums))).setParseAction(actions.Number)
 STRING = (dblQuotedString | sglQuotedString)("STRING").setParseAction(actions.String)
 NEWLINE = lineEnd.suppress()
-
-#Indentation
-#INDENT = lineEnd.suppress() + empty + empty.copy().setParseAction(actions.checkIndent).setDebug().setName('indent')
-#INDENT = lineStart.setParseAction(actions.checkIndent).setDebug().setName('indent')
-#UNDENT = empty.copy().setParseAction(actions.checkUndent).setDebug().setName('undent')
-#SAME_DENT = lineEnd.suppress() + empty + empty.copy().setParseAction(actions.checkSamedent).setDebug().setName('samedent')
 
 #Comparisons
 greater = Literal('>')('greater')
@@ -140,7 +125,6 @@ reserves = ( \
 	| complement
 )
 
-#ParserElement.setDefaultWhitespaceChars(" \t")
 #------------------------------------------------#
 # C O R E | G R A M M A R
 #------------------------------------------------#
@@ -156,22 +140,22 @@ test = Forward()('test')#.setParseAction(actions.Test)
 testlist_comp = Forward()('testlist_comp')
 testlist1 = Forward()('testlist1')
 atom = ((LPAREN + testlist_comp + RPAREN) \
-       ^ (TICK + testlist1 + TICK)
-       ^ (( (NotAny(reserves) + NAME) | NUM | OneOrMore(STRING))))('atom').setParseAction(actions.Atom)
+	   ^ (TICK + testlist1 + TICK)
+	   ^ (( (NotAny(reserves) + NAME ) | NUM | OneOrMore(STRING))))('atom').setParseAction(actions.Atom)
 	   
 #Expr node is a building block of many grammars
 #[depends on #Argument Lists] => *Forwards trailer
 factor = Forward()('factor')
 trailer = Forward()('trailer')
-power = (atom + ZeroOrMore(trailer) + Optional('**' + factor))("power")
+power = (atom + ZeroOrMore(trailer) + Optional('**' + factor)).setParseAction(actions.Power)
 factor << (((plus ^ minus ^ complement) + factor) ^ power)
 term = (factor + ZeroOrMore((mult ^ div ^ mod ^ divFloor) + factor))('term')
-arith_expr = (term + ZeroOrMore((plus ^ minus) + term))('arith_expr')
+arith_expr = (term + ZeroOrMore((plus ^ minus) + term))('arith_expr').setParseAction(actions.ArithmeticExpression)
 shift_expr = (arith_expr + ZeroOrMore((shiftLeft ^ shiftRight) + arith_expr)) \
 	('shift_expr')
 and_expr = (shift_expr + ZeroOrMore(bitwiseAnd + shift_expr))('and_expr')
 xor_expr = (and_expr + ZeroOrMore(complement + and_expr))('xor_expr')
-expr = (xor_expr + ZeroOrMore(bitwiseOr + xor_expr))('expr')
+expr = (xor_expr + ZeroOrMore(bitwiseOr + xor_expr)).setParseAction(actions.Expression)('expr')
 exprlist = (delimitedList(expr) + ENDCOMMA)('exprlist')
 
 #Comparison nodes
@@ -179,10 +163,10 @@ comp_op = (greater^lesser^greaterOrEqual^lesserOrEqual^equal^notequal^_is^_in^_n
           ^ _not + _in ^ _is + _not)('comp_op')
 comparison = (expr + ZeroOrMore(comp_op + expr))('comparison').setParseAction(actions.Comparison)
 not_test = Forward()('not_test')
-not_test << ((_not +  not_test) ^ comparison).setDebug().setName("teasdfst")
+not_test << ((_not +  not_test) ^ comparison)
 and_test = (not_test + ZeroOrMore(_and + not_test))('and_test')
-or_test = (and_test + ZeroOrMore(_or + and_test))('or_test').setDebug().setName('ORtest')
-test << (or_test + Optional(_if + or_test + _else + test))('test').setDebug().setName('test')
+or_test = (and_test + ZeroOrMore(_or + and_test))('or_test')
+test << (or_test + Optional(_if + or_test + _else + test))('test').setParseAction(actions.Test)
 comp_iter = Forward()('comp_iter')
 comp_for = (_for + exprlist + _in + or_test + Optional(comp_iter))('comp_for')
 comp_if = (_if + test + Optional(comp_iter))('comp_if')
@@ -217,38 +201,37 @@ arglist = (ZeroOrMore(argument + COMMA) \
 
 trailer << ( (LPAREN + Optional(arglist) + RPAREN) \
           ^ (LBRACK + subscriptlist + RBRACK) \
-          ^ (DOT + NAME))('trailer')
+          ^ (DOT + NAME))('trailer') 
 lambdef = (_lambda + Optional(varargslist) + COLON + test)('lambdef')
-parameters = (LPAREN + Optional(varargslist) + RPAREN)('parameters')
+parameters = (LPAREN + Optional(varargslist) + RPAREN)('parameters').setParseAction(actions.Parameters)
 
 
 #Block statements [depends on #Top Level Statements] => *Forwards simple_stmt & stmt
 simple_stmt = Forward()('simple_stmt')
 stmt = Forward()('stmt')
 suite_stmt = Forward()('suite_stmt')
+
 indentst = [1]
-suite = indentedBlock(suite_stmt, indentst)#.setParseAction(actions.Suite)
-suite.setDebug().setName('suite')
-#suite = ((INDENT + OneOrMore(suite_stmt)) ^ simple_stmt )('suite').setDebug().setName('suite')
-#suite = ((NEWLINE + INDENT + OneOrMore(stmt) + UNDENT) | simple_stmt)('suite')#.setDebug().setName("suite")
+suite = indentedBlock(suite_stmt, indentst).setParseAction(actions.Suite)
+
 if_stmt = (_if + test + COLON + suite + ZeroOrMore(_elif + test + COLON + suite) \
 		+ Optional(_else + COLON) + suite).setParseAction(actions.IfStatement)
-for_stmt = (_for + exprlist + _in + testlist + COLON + suite \
+for_stmt = (_for + NAME + assign + NUM + Keyword('to').suppress() + NUM + COLON + suite \
 		+ Optional(_else + COLON + suite))('for_stmt').setParseAction(actions.ForStatement)
 while_stmt = (_while + test + COLON + suite + Optional(_else + COLON + suite))('while').setParseAction(actions.WhileStatement)
 funcdef = (_def + NAME + parameters + COLON('DefiningLine') + suite)('funcdef').setParseAction(actions.FunctionDeclaration)
-return_stmt = (_return + Optional(testlist))('return_stmt')
 
 #Block flow control statments
-pass_stmt = _pass('pass_stmt')
-break_stmt = _break('break_stmt')
-continue_stmt = _continue('continue_stmt')
-flow_stmt = (break_stmt ^ continue_stmt ^ return_stmt) ('flow_stmt')
+return_stmt = (_return + Optional(testlist))('return_stmt').setParseAction(actions.ReturnStatement)
+pass_stmt = _pass('pass_stmt').setParseAction(actions.PassStatement)
+break_stmt = _break('break_stmt').setParseAction(actions.BreakStatement)
+continue_stmt = _continue('continue_stmt').setParseAction(actions.ContinueStatement)
+flow_stmt = (break_stmt ^ continue_stmt ^ return_stmt) ('flow_stmt').setParseAction(actions.FlowStatement)
 
 #Class Declarations [depends on #Block Statements]
-classdef = (_class + NAME + Optional(LPAREN + testlist + RPAREN) + COLON + suite)('classdef')
+classdef = (_class + NAME + Optional(LPAREN + testlist + RPAREN) + COLON + suite)('classdef').setParseAction(actions.ClassDeclaration)
 decorator_kernel = (KERNELDEC + Optional(LPAREN + arglist + RPAREN) + NEWLINE)('decorator_kernel')
-decorated = (decorator_kernel + (classdef ^ funcdef))('decorated').setParseAction(actions.FunctionDeclaration)#.setDebug().setName("dec kernel")
+decorated = (decorator_kernel + funcdef)('decorated').setParseAction(actions.KernelDeclaration)
 
 #Other Statements
 augassign = (plusAssign ^ minusAssign ^ multAssign ^ divAssign ^ modAssign \
@@ -257,21 +240,23 @@ augassign = (plusAssign ^ minusAssign ^ multAssign ^ divAssign ^ modAssign \
 		.setResultsName('augassign')
 global_stmt = (_global + delimitedList(NAME))('global_stmt')
 assert_stmt = (_assert + delimitedList(test))('assert_stmt')
-del_stmt = (_delete + exprlist)('del_stmt')
-print_stmt = (_print + (delimitedList(test) + ENDCOMMA))('print_stmt')
+del_stmt = (_delete + exprlist)('del_stmt').setParseAction(actions.DeleteStatement)
+print_stmt = ('print' + (delimitedList(test) + ENDCOMMA)).setParseAction(actions.PrintStatement)('print_stmt')
+func_call = (NAME + parameters).setParseAction(actions.FunctionCall)
 
 #Top level statements
-expr_stmt = (testlist + ZeroOrMore((augassign + testlist) ^ (assign + testlist)))('expr_stmt').setParseAction(actions.Expression)#.setDebug().setName('expression')
-small_stmt = (expr_stmt ^ print_stmt.setDebug().setName('PRINT') ^ del_stmt ^ pass_stmt ^ flow_stmt \
-		^ import_stmt ^ global_stmt ^ assert_stmt)('small_stmt').setDebug().setName("small_stmt").setParseAction(actions.SmallStatement)
+expr_stmt = (testlist + ZeroOrMore((augassign + testlist) ^ (assign + testlist)))('expr_stmt').setParseAction(actions.ExpressionStatement)
+small_stmt = ( func_call ^ expr_stmt  ^ print_stmt ^ del_stmt ^ pass_stmt ^ flow_stmt \
+		^ import_stmt ^ global_stmt ^ assert_stmt)('small_stmt').setParseAction(actions.SmallStatement)
 simple_stmt << (small_stmt + ZeroOrMore(';' + small_stmt) \
-		+ Optional(SEMICOLON) + NEWLINE)#.setDebug().setName("simple statement")
+		+ Optional(SEMICOLON) + NEWLINE).setParseAction(actions.SimpleStatement)
 compound_stmt = (if_stmt | while_stmt | for_stmt | funcdef | classdef | decorated) \
 	('compound_stmt').setParseAction(actions.CompoundStatement)
 
 #suite_stmt avoids simple_stmt EOL
 suite_stmt << (small_stmt ^ compound_stmt)
-stmt << (simple_stmt ^ compound_stmt)('stmt').setParseAction(actions.Statement).setName("stmt").setDebug()
+stmt << (simple_stmt ^ compound_stmt)('stmt').setParseAction(actions.Statement)
 
 #Top of our parser
 file_input = (ZeroOrMore(stmt | NEWLINE).parseWithTabs()).setParseAction(actions.Root)
+>>>>>>> 2a74934ebcbcce67da26645f171ed6fee065d76b

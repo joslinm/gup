@@ -3670,9 +3670,9 @@ def indentedBlock(blockStatementExpr, indentStack, indent=True):
     PEER   = Empty().setParseAction(checkPeerIndent)
     UNDENT = Empty().setParseAction(checkUnindent)
     if indent:
-        smExpr = Group( Optional(NL) +
+        smExpr =  (Optional(NL) +
             #~ FollowedBy(blockStatementExpr) +
-            INDENT + (OneOrMore( PEER + Group(blockStatementExpr) + Optional(NL) )) + UNDENT)
+            INDENT + (OneOrMore( PEER + blockStatementExpr + Optional(NL) )) + UNDENT)
     else:
         smExpr = Group( Optional(NL) +
             (OneOrMore( PEER + Group(blockStatementExpr) + Optional(NL) )) )
