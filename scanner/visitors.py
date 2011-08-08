@@ -322,8 +322,13 @@ for(i=0;i<gupKernelCount;i++) {
 		elif length % 2 == 0:
 			name_obj = element[1].find_child('Name')
 			if name_obj:
-				if self.symbols[name_obj[0]]['type'] == 'int' or self.symbols[name_obj[0]]['type'] == 'float':
+				if self.symbols[name_obj[0]]['type'] == 'int':
 					element[0] = 'printf("%d"'
+					element[0] += ', %s)' % name_obj[0]
+					self.tokens.pop() #remove test off the rhs
+					self.tokens.append(element[0])
+				elif self.symbols[name_obj[0]['type'] == 'float':
+					element[0] = 'printf("%f"'
 					element[0] += ', %s)' % name_obj[0]
 					self.tokens.pop() #remove test off the rhs
 					self.tokens.append(element[0])
