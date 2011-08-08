@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+naw #!/usr/bin/python2
 import sys
 import subprocess
 from compiler import Compiler

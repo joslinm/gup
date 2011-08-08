@@ -135,7 +135,13 @@ class Parameters(node):
 class IfStatement(node):
 	pass
 class ForStatement(node):
-	pass
+	def __init__(self,t):
+		node.__init__(self,t)
+		self.symbols[t[1].get_child_str()] = {'type':'int', 'declared':True, 'scope':-1}
+		self.t[1].type = {'type':'int', 'declared':True, 'scope':-1}
+		print self.t[1].type
+		raw_input()
+
 class WhileStatement(node):
 	pass
 class FunctionDeclaration(node):
@@ -204,6 +210,7 @@ class ExpressionStatement(node):
 					dict['declared'] = False
 					dict['scope'] = 0
 					self.symbols[name] = dict
+					name_obj.type = dict
 			else:
 				raise Exception("Unknown variable right hawre: %s" % name)
 		else:
