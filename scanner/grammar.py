@@ -259,4 +259,3 @@ stmt << (simple_stmt ^ compound_stmt)('stmt').setParseAction(actions.Statement)
 
 #Top of our parser
 file_input = (ZeroOrMore(stmt | NEWLINE).parseWithTabs()).setParseAction(actions.Root)
->>>>>>> 2a74934ebcbcce67da26645f171ed6fee065d76b

@@ -4,25 +4,8 @@ from pyparsing import *
 GUP.scanner.actions
 Definition of parse actions on grammar including classes
 -----
-
-TODO
-<<<<<<< HEAD
-- Create class hierarchy			 		[ ]
-=======
->>>>>>> 2a74934ebcbcce67da26645f171ed6fee065d76b
-- Create a translation dict	& make it		[ ]
-	so that every Keyword() is in there
 '''
 
-<<<<<<< HEAD
-
-def getCol(s,l,t):
-		print l
-		print col(l,s)
-		print s	
-
-=======
->>>>>>> 2a74934ebcbcce67da26645f171ed6fee065d76b
 #SYMBOL TABLE
 symbol_table = {
 				'output': {'type':'float', 'declared':True, 'scope':-1},
@@ -222,41 +205,6 @@ class ExpressionStatement(node):
 		else:
 			return None
 
-<<<<<<< HEAD
-class Number(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.tokens[index]
-		
-	def accept(self, visitor):
-		for t in self.tokens:
-			if type(t) == type(''):
-				visitor.visit(t)
-			else:
-				t.accept(visitor)
-		visitor.visit(type(self).__name__)
-
-class Atom(object):
-	def __init__(self,t):
-		self.t = t
-		self.tokens = t.asList()
-	def __str__(self):
-		return str(self.t)
-	def __getitem__(self, index):
-		return self.tokens[index]
-		
-	def accept(self, visitor):
-		for t in self.tokens:
-			if type(t) == type(''):
-				visitor.visit(t)
-			else:
-				t.accept(visitor)
-		visitor.visit(type(self).__name__)
-=======
 class FunctionCall(node):	
 	pass
 class PrintStatement(node):
@@ -330,5 +278,3 @@ class String(node):
 	pass
 class Number(node):
 	pass
-
->>>>>>> 2a74934ebcbcce67da26645f171ed6fee065d76b
