@@ -1,4 +1,5 @@
-
+#include <stdio.h>
+#include <stdlib.h>
 int main() {
 char[250] a ;
 a = "hello world";
