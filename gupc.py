@@ -19,9 +19,9 @@ for i in range(1, len(sys.argv)):
 	elif inputGup == "":
 		inputGup = sys.argv[i]
 	elif inputFile == dir + "/translated/default": #Set input filename
-		inputFile ='translated/' +  sys.argv[i]
+		inputFile ='/translated/' +  sys.argv[i]
 	elif outputFile == dir + '/translated/gup.out':
-		outputFile = 'translated/' + sys.argv[i]
+		outputFile = '/translated/' + sys.argv[i]
 	else:
 		print "Invalid argument '" + sys.argv[i] + "'"
 
