@@ -10,8 +10,10 @@ Definition of parse actions on grammar including classes
 symbol_table = {
 				'output': {'type':'float', 'declared':True, 'scope':-1},
 				'inputA': {'type':'float', 'declared':True, 'scope':-1},
-				'inputB': {'type':'float', 'declared':True, 'scope':-1}
-}
+				'inputB': {'type':'float', 'declared':True, 'scope':-1},
+				'outputbuffer': {'type':'iter', 'declared':True, 'scope':-1}
+				}
+
 functions = {}
 
 #Bare class to define functions with
@@ -136,7 +138,6 @@ class ForStatement(node):
 		self.symbols[t[1].get_child_str()] = {'type':'int', 'declared':True, 'scope':-1}
 		self.t[1].type = {'type':'int', 'declared':True, 'scope':-1}
 		print self.t[1].type
-		raw_input()
 
 class WhileStatement(node):
 	pass

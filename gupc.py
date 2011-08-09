@@ -1,8 +1,13 @@
 #!/usr/bin/python27
 import sys
 import subprocess
+import os
 from compiler import Compiler
 #from scanner.compiler import Compiler
+
+dir = os.getcwd()
+cl_lib = dir + 'opencl/lib/'
+cl_inc = dir + 'opencl/include'
 
 inputGup = ""
 inputFile = ""
@@ -26,7 +31,8 @@ piler = Compiler(inputGup, inputFile)
 kernel = piler.compile()
 
 if (kernel):
-	subprocess.check_call(['gcc', inputFile, '-o', outputFile, '-lOpenCL'])
+	subprocess.check_call(['gcc', inputFile, '-o', outputFile, 
+		'-lOpenCL', '-L%s' % cl_lib, '-l%s' % cl_inc])
 	subprocess.check_call(["./" + outputFile])
 else:
 	subprocess.check_call(['gcc', inputFile, '-o', outputFile])
