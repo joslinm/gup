@@ -9,10 +9,10 @@ class Compiler(object):
 		self.output_file = output_file
 	def compile(self):
 		tokens = grammar.file_input.parseFile(self.input_file)
-		pl = visitors.PrintListVisitor()
+		pl = visitors.TranslateVisitor()
 		tokens[0].accept(pl)
 		
-		f = open(self.output_file, 'w')
+		f = open(self.output_file + '.c', 'w')
 		for x in pl.tokens:
 			f.write(x)
 

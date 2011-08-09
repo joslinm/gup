@@ -9,7 +9,7 @@ cl_lib = dir + 'opencl/lib/'
 cl_inc = dir + 'opencl/include'
 
 inputGup = ""
-inputFile = ""
+inputFile = "default"
 outputFile = "gup.out"
 	
 for i in range(1, len(sys.argv)):
@@ -18,7 +18,7 @@ for i in range(1, len(sys.argv)):
 		i += 1
 	elif inputGup == "":
 		inputGup = sys.argv[i]
-	elif inputFile == "": #Set input filename
+	elif inputFile == "default": #Set input filename
 		inputFile ='translated/' +  sys.argv[i]
 	elif outputFile == 'gup.out':
 		outputFile = 'translated/' + sys.argv[i]
