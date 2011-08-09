@@ -88,7 +88,14 @@ void gupInitKernels() {
 	free(gupKernelSrc);
 }
 
-void gupEnqueue2DRangeKernel(cl_kernel kernel, size_t* global, size_t* local) {
+void gupEnqueue2DRangeKernel(const char* kernelName, size_t* global, size_t* local) {
+	cl_kernel kernel;
+	for(int i=0;i<gupKernelCount;i++){
+		if(strcmp(kernelName,gupKernelNames[i]) == 0){
+			kernel = gupKernels[i];
+			break;
+		}
+	}
 	// Enqueue the kernel object
 	cl_int err;
 	err = clEnqueueNDRangeKernel(gupCmdQueue, kernel, 2, NULL, global, local, 0, NULL, NULL);

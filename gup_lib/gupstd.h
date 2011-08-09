@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "CL/cl.h"
 
 #define gup_matrix cl_float*
