@@ -25,6 +25,10 @@ for i in range(1, len(sys.argv)):
 	else:
 		print "Invalid argument '" + sys.argv[i] + "'"
 
+if not os.path.exists(inputGup):
+	if not '.gup' in inputGup:
+		if os.path.exists(dir + '/test_code/' + inputGup + '.gup'):
+			inputGup = dir + '/test_code/' + inputGup + '.gup'
 
 piler = compiler.Compiler(inputGup, inputFile)
 kernel = piler.compile()

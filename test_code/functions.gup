@@ -1,0 +1,12 @@
+@kernel
+def kernely():
+	d = 0
+	for y=0 to 31:
+		e= inputA[y]
+		f = inputB[y]
+		d += f * e
+	
+	output = d
+
+kernely()
+print outputbuffer
