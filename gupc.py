@@ -2,13 +2,11 @@
 import sys
 import subprocess
 import os
+from scanner import compiler
 
 dir = os.getcwd()
 cl_lib = dir + 'opencl/lib/'
 cl_inc = dir + 'opencl/include'
-
-os.chdir(dir + '/scanner')
-from scanner import compiler
 
 inputGup = ""
 inputFile = ""
