@@ -79,12 +79,12 @@ void gupInitKernels() {
 	//gupKernelNames = names;
 	gupLoadKernelFile("kernels.cl");
 	gupCreateProgram();
+	//printf("FUCK\n");
 	//gupKernels = malloc(sizeof(ptr) * 
 	int i;
 	for(i=0;i<gupKernelCount;i++){
 		gupKernels[i] = gupCreateKernel(gupKernelNames[i]);
 	}
-	//printf("FUCK\n");
 	free(gupKernelSrc);
 }
 
@@ -109,3 +109,4 @@ void gupEnqueue2DRangeKernel(char* kernelName, size_t* global, size_t* local) {
 void gupFinish(){
 	clFinish(gupCmdQueue);
 }
+
