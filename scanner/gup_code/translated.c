@@ -1,10 +1,16 @@
 #include <gupstd.h>
 #define BLOCK_SIZE 8
 int main() {
+<<<<<<< HEAD
 gupKernelCount = 2
 gupKernelNames = (char**) malloc(sizeof(int*) * gupKernelCount);
 gupKernelNames[0] = kernelz
 gupKernelNames[1] = kernely
+=======
+gupKernelCount = 1;
+gupKernelNames = (char**) malloc(sizeof(int*) * gupKernelCount);
+gupKernelNames[0] = "kernely";
+>>>>>>> 1d73a8108bb9adae7bea4743b554f62754d64e48
 gupInitDevice();
 gupInitKernels();
 
@@ -42,6 +48,8 @@ for(i=0;i<gupKernelCount;i++) {
 		printf("Unable to set kernel arguments. Error Code=%d",err);
 		exit(1);
 	}
+<<<<<<< HEAD
+=======
 }
 
 clReleaseMemObject(input_buffer1);
@@ -63,6 +71,41 @@ for(i=0;i<width*height;i++) {
 	inputMatrix2[i] = i / 100.0f;
 	multMatrix[i] = 0;
 	multMatrix2[i] = 0;
+>>>>>>> 1d73a8108bb9adae7bea4743b554f62754d64e48
+}
+	
+input_buffer1 = newReadFloatBuffer(height*width, inputMatrix1);
+input_buffer2 = newReadFloatBuffer(height*width, inputMatrix2);
+output_buffer = newWriteFloatBuffer(height*width);
+gupEnqueue2DRangeKernel("kernely", global, local);
+gupFinish();
+readFloatBuffer(output_buffer, width*height, multMatrix)
+;
+
+<<<<<<< HEAD
+clReleaseMemObject(input_buffer1);
+clReleaseMemObject(input_buffer2);
+clReleaseMemObject(output_buffer);
+
+free(inputMatrix1);
+free(inputMatrix2);
+free(multMatrix);
+free(multMatrix2);
+	
+inputMatrix1 = newMatrix(width*height);
+inputMatrix2 = newMatrix(width*height);
+multMatrix = newMatrix(width*height);
+multMatrix2 = newMatrix(width*height);
+
+for(i=0;i<width*height;i++) {
+	inputMatrix1[i] = i / 100.0f;
+	inputMatrix2[i] = i / 100.0f;
+	multMatrix[i] = 0;
+	multMatrix2[i] = 0;
+=======
+for (int z = 0; z < width*height; z++) {
+printf("%f", multMatrix[z]);
+>>>>>>> 1d73a8108bb9adae7bea4743b554f62754d64e48
 }
 	
 input_buffer1 = newReadFloatBuffer(height*width, inputMatrix1);
@@ -77,10 +120,18 @@ clReleaseMemObject(input_buffer1);
 clReleaseMemObject(input_buffer2);
 clReleaseMemObject(output_buffer);
 
+<<<<<<< HEAD
+=======
+clReleaseMemObject(input_buffer1);
+clReleaseMemObject(input_buffer2);
+clReleaseMemObject(output_buffer);
+
+>>>>>>> 1d73a8108bb9adae7bea4743b554f62754d64e48
 free(inputMatrix1);
 free(inputMatrix2);
 free(multMatrix);
 free(multMatrix2);
+<<<<<<< HEAD
 	
 inputMatrix1 = newMatrix(width*height);
 inputMatrix2 = newMatrix(width*height);
@@ -101,6 +152,8 @@ gupEnqueue2DRangeKernel("kernelz", global, local);
 gupFinish();
 readFloatBuffer(output_buffer, width*height, multMatrix)
 ;
+=======
+>>>>>>> 1d73a8108bb9adae7bea4743b554f62754d64e48
 gupClean();
  return 0;
 }
