@@ -84,11 +84,19 @@ void gupInitKernels() {
 	for(i=0;i<gupKernelCount;i++){
 		gupKernels[i] = gupCreateKernel(gupKernelNames[i]);
 	}
-	printf("FUCK\n");
+	//printf("FUCK\n");
 	free(gupKernelSrc);
 }
 
-void gupEnqueue2DRangeKernel(cl_kernel kernel, size_t* global, size_t* local) {
+void gupEnqueue2DRangeKernel(char* kernelName, size_t* global, size_t* local) {
+	cl_kernel kernel;
+	int i;
+	for(i=0;i<gupKernelCount;i++){
+		if(strcmp(kernelName,gupKernelNames[i]) == 0){
+			kernel = gupKernels[i];
+			break;
+		}
+	}
 	// Enqueue the kernel object
 	cl_int err;
 	err = clEnqueueNDRangeKernel(gupCmdQueue, kernel, 2, NULL, global, local, 0, NULL, NULL);
