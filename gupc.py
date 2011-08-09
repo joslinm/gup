@@ -30,6 +30,7 @@ if not os.path.exists(inputGup):
 		if os.path.exists(dir + '/test_code/' + inputGup + '.gup'):
 			inputGup = dir + '/test_code/' + inputGup + '.gup'
 
+inputFile += '.c'
 piler = compiler.Compiler(inputGup, inputFile)
 kernel = piler.compile()
 
