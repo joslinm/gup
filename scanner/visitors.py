@@ -5,10 +5,12 @@ dispatching & is packaged with the necessary utility methods such as merge
 '''
 
 translate_table = {'True' : 'true', 'False': 'false'''}
-
+suppress_semicolon = False
 #General Visitor (Should be inherited)
 class Visitor(object):
 	def __init__(self):
+		global suppress_semicolon
+		self.suppr = suppress_semicolon
 		self.tokens = []
 		self.kernels = []
 		self.kernel_stack = []
@@ -174,12 +176,12 @@ class TranslateVisitor(Visitor):
 				print declarations
 		if len(self.kernels) > 0:
 			names = []
-			declarations += 'gupKernelCount = "%s";\n' % len(self.kernel_stack)
+			declarations += 'gupKernelCount = %s;\n' % len(self.kernel_stack)
 			declarations += 'gupKernelNames = (char**) malloc(sizeof(int*) * gupKernelCount);\n'
 			for x in self.kernels:
 				names.append(self.kernel_stack.pop())
 			for x in range(len(names)):
-				declarations += 'gupKernelNames[%s] = %s;\n' % (x, names[x])
+				declarations += 'gupKernelNames[%s] = "%s";\n' % (x, names[x])
 			
 			declarations += 'gupInitDevice();\n'
 			declarations += 'gupInitKernels();\n'
@@ -229,6 +231,16 @@ for(i=0;i<gupKernelCount;i++) {
 				"#include <gupstd.h>\n" +
 				"#define BLOCK_SIZE 8\n" +
 				"int main() {\n")
+				self.tokens.append('''
+clReleaseMemObject(input_buffer1);
+clReleaseMemObject(input_buffer2);
+clReleaseMemObject(output_buffer);
+
+free(inputMatrix1);
+free(inputMatrix2);
+free(multMatrix);
+free(multMatrix2);
+''')
 				self.tokens.append('gupClean();\n return 0;\n}')
 			else:
 				self.tokens.insert(0, 
@@ -252,8 +264,10 @@ for(i=0;i<gupKernelCount;i++) {
 	def visit_SmallStatement(self,element):
 		print type(element).__name__
 		print element
-		
-		self.append(';\n')
+		if self.suppr: 
+			self.suppr = False 
+		else: 
+			self.append(';\n')
 		
 	def visit_Suite(self, element):
 		print type(element).__name__
@@ -288,7 +302,8 @@ for(i=0;i<gupKernelCount;i++) {
 		min = self.tokens.pop()
 		definition = self.tokens.pop()
 		
-		for_branch = 'for (int %s = %s;' % (definition, min)
+		for_branch = 'int %s = %s;' % (definition, min)
+		for_branch += 'for (%s;' % definition
 		for_branch += '%s <= %s;' % (definition, max)
 		for_branch += '%s++)' % definition
 		for_branch += '\n%s' % suite
@@ -331,6 +346,15 @@ for(i=0;i<gupKernelCount;i++) {
 					element[0] = 'printf("%f"'
 					element[0] += ', %s)' % name_obj[0]
 					self.tokens.pop() #remove test off the rhs
+					self.tokens.append(element[0])
+				elif self.symbols[name_obj[0]]['type'] == 'iter':
+					element[0] = '''
+for (int z = 0; z < width*height; z++) {
+printf("%f", multMatrix[z]);
+}
+'''					
+					self.suppr = True
+					self.tokens.pop()
 					self.tokens.append(element[0])
 				else:
 					element[0] = 'printf('
