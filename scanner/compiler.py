@@ -12,7 +12,7 @@ class Compiler(object):
 		pl = visitors.TranslateVisitor()
 		tokens[0].accept(pl)
 		
-		f = open(self.output_file, 'w')
+		f = open(self.output_file + '.c', 'w')
 		for x in pl.tokens:
 			f.write(x)
 
