@@ -34,10 +34,10 @@ piler = compiler.Compiler(inputGup, inputFile)
 kernel = piler.compile()
 
 if (kernel):
-	subprocess.check_call(['gcc', inputFile, '-o', outputFile, 
+	subprocess.check_call(['gcc', inputFile + '.c', '-o', outputFile, 
 		'-lOpenCL', '-L%s' % cl_lib, '-l%s' % cl_inc, '-l%s' % dir + '/gup_lib',
 		'-std=c99'])
 	subprocess.check_call(["./" + outputFile])
 else:
-	subprocess.check_call(['gcc', inputFile, '-o', outputFile])
+	subprocess.check_call(['gcc', inputFile + '.c', '-o', outputFile])
 	subprocess.check_call([outputFile])
