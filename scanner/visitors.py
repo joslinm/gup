@@ -174,12 +174,12 @@ class TranslateVisitor(Visitor):
 				print declarations
 		if len(self.kernels) > 0:
 			names = []
-			declarations += 'gupKernelCount = %s\n' % len(self.kernel_stack)
+			declarations += 'gupKernelCount = "%s";\n' % len(self.kernel_stack)
 			declarations += 'gupKernelNames = (char**) malloc(sizeof(int*) * gupKernelCount);\n'
 			for x in self.kernels:
 				names.append(self.kernel_stack.pop())
 			for x in range(len(names)):
-				declarations += 'gupKernelNames[%s] = %s\n' % (x, names[x])
+				declarations += 'gupKernelNames[%s] = %s;\n' % (x, names[x])
 			
 			declarations += 'gupInitDevice();\n'
 			declarations += 'gupInitKernels();\n'
