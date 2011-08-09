@@ -1,0 +1,5 @@
+c = 10
+for x=0 to 100:
+	a = 6 * 30
+	b = inputB[x]
+	c = a + b

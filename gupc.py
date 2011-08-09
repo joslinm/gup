@@ -1,11 +1,15 @@
 #!/usr/bin/python27
 import sys
 import subprocess
-from compiler import Compiler
-#from scanner.compiler import Compiler
+import os
+from scanner import compiler
+
+dir = os.getcwd()
+cl_lib = dir + 'opencl/lib/'
+cl_inc = dir + 'opencl/include'
 
 inputGup = ""
-inputFile = ""
+inputFile = "default"
 outputFile = "gup.out"
 	
 for i in range(1, len(sys.argv)):
@@ -14,19 +18,25 @@ for i in range(1, len(sys.argv)):
 		i += 1
 	elif inputGup == "":
 		inputGup = sys.argv[i]
-	elif inputFile == "": #Set input filename
+	elif inputFile == "default": #Set input filename
 		inputFile ='translated/' +  sys.argv[i]
 	elif outputFile == 'gup.out':
 		outputFile = 'translated/' + sys.argv[i]
 	else:
 		print "Invalid argument '" + sys.argv[i] + "'"
 
+if not os.path.exists(inputGup):
+	if not '.gup' in inputGup:
+		if os.path.exists(dir + '/test_code/' + inputGup + '.gup'):
+			inputGup = dir + '/test_code/' + inputGup + '.gup'
 
-piler = Compiler(inputGup, inputFile)
+inputFile += '.c'
+piler = compiler.Compiler(inputGup, inputFile)
 kernel = piler.compile()
 
 if (kernel):
-	subprocess.check_call(['gcc', inputFile, '-o', outputFile, '-lOpenCL'])
+	subprocess.check_call(['gcc', inputFile, '-o', outputFile, 
+		'-lOpenCL', '-L%s' % cl_lib, '-l%s' % cl_inc])
 	subprocess.check_call(["./" + outputFile])
 else:
 	subprocess.check_call(['gcc', inputFile, '-o', outputFile])
