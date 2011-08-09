@@ -2,12 +2,13 @@
 import sys
 import subprocess
 import os
-from compiler import Compiler
-#from scanner.compiler import Compiler
 
 dir = os.getcwd()
 cl_lib = dir + 'opencl/lib/'
 cl_inc = dir + 'opencl/include'
+
+os.chdir(dir + '/scanner')
+from scanner import compiler
 
 inputGup = ""
 inputFile = ""
@@ -27,7 +28,7 @@ for i in range(1, len(sys.argv)):
 		print "Invalid argument '" + sys.argv[i] + "'"
 
 
-piler = Compiler(inputGup, inputFile)
+piler = compiler.Compiler(inputGup, inputFile)
 kernel = piler.compile()
 
 if (kernel):
