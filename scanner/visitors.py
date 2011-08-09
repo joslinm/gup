@@ -168,7 +168,7 @@ class TranslateVisitor(Visitor):
 		print type(element).__name__
 		declarations = ''
 		for y,x in self.symbols.iteritems():
-			if  1 == x['scope']:
+			if 1 == x['scope']:
 				if not x['declared']:
 					declarations += '%s %s ;\n' % (x['type'], y)
 				print declarations

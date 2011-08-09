@@ -10,7 +10,8 @@ Definition of parse actions on grammar including classes
 symbol_table = {
 				'output': {'type':'float', 'declared':True, 'scope':-1},
 				'inputA': {'type':'float', 'declared':True, 'scope':-1},
-				'inputB': {'type':'float', 'declared':True, 'scope':-1}
+				'inputB': {'type':'float', 'declared':True, 'scope':-1},
+				'output_buffer': {'type':'float', 'declared':True, 'scope':-1}
 }
 functions = {}
 
@@ -142,11 +143,13 @@ class WhileStatement(node):
 	pass
 class FunctionDeclaration(node):
 	def __init__(self,t):
-		global functions
-		self.t = t
-		self.tokens = t.asList()
-		self.functions = functions
+		node.__init__(self,t)
+		print self.t
+		print self.t[2]
+		raw_input()
+		
 		dict = {}
+		dict['branch'] = ''
 		dict['num_params'] = len(t[2])
 		dict['kernel'] = False
 		dict['name'] = t[1].get_child_str()
