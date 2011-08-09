@@ -1,159 +1,25 @@
-#include <gupstd.h>
-#define BLOCK_SIZE 8
+#include <stdio.h>
+#include <stdlib.h>
 int main() {
-<<<<<<< HEAD
-gupKernelCount = 2
-gupKernelNames = (char**) malloc(sizeof(int*) * gupKernelCount);
-gupKernelNames[0] = kernelz
-gupKernelNames[1] = kernely
-=======
-gupKernelCount = 1;
-gupKernelNames = (char**) malloc(sizeof(int*) * gupKernelCount);
-gupKernelNames[0] = "kernely";
->>>>>>> 1d73a8108bb9adae7bea4743b554f62754d64e48
-gupInitDevice();
-gupInitKernels();
-
-const int width = 32;
-const int height = 32;
-	
-printf("Initializing matrices...");
-gup_matrix inputMatrix1 = newMatrix(width*height);
-gup_matrix inputMatrix2 = newMatrix(width*height);
-gup_matrix multMatrix = newMatrix(width*height);
-gup_matrix multMatrix2 = newMatrix(width*height);
-int i;
-for(i=0;i<width*height;i++) {
-	inputMatrix1[i] = i / 100.0f;
-	inputMatrix2[i] = i / 100.0f;
-	multMatrix[i] = 0;
-	multMatrix2[i] = 0;
-}
-	
-printf("Memory stuff...");
-
-cl_mem input_buffer1 = newReadFloatBuffer(height*width, inputMatrix1);
-cl_mem input_buffer2 = newReadFloatBuffer(height*width, inputMatrix2);
-cl_mem output_buffer = newWriteFloatBuffer(height*width);
-size_t global[2] = {width, height};
-size_t local[2] = {BLOCK_SIZE, BLOCK_SIZE};
-	
-cl_int err;
-for(i=0;i<gupKernelCount;i++) {
-	if (clSetKernelArg(gupKernels[i], 0, sizeof(cl_mem), &output_buffer) ||
-		clSetKernelArg(gupKernels[i], 1, sizeof(cl_mem), &input_buffer1) ||
-		clSetKernelArg(gupKernels[i], 2, sizeof(cl_mem), &input_buffer2) ||
-		clSetKernelArg(gupKernels[i], 3, sizeof(cl_uint), &width) ||
-		clSetKernelArg(gupKernels[i], 4, sizeof(cl_uint), &height) != CL_SUCCESS) {
-		printf("Unable to set kernel arguments. Error Code=%d",err);
-		exit(1);
-	}
-<<<<<<< HEAD
-=======
+char* school ;
+char* name ;
+float age ;
+name = "mark";
+age = 23;
+school = "wentworth";
+if (age >= 21)  {
+float x ;
+x = 5;
+ b = 10;
 }
 
-clReleaseMemObject(input_buffer1);
-clReleaseMemObject(input_buffer2);
-clReleaseMemObject(output_buffer);
-
-free(inputMatrix1);
-free(inputMatrix2);
-free(multMatrix);
-free(multMatrix2);
-	
-inputMatrix1 = newMatrix(width*height);
-inputMatrix2 = newMatrix(width*height);
-multMatrix = newMatrix(width*height);
-multMatrix2 = newMatrix(width*height);
-
-for(i=0;i<width*height;i++) {
-	inputMatrix1[i] = i / 100.0f;
-	inputMatrix2[i] = i / 100.0f;
-	multMatrix[i] = 0;
-	multMatrix2[i] = 0;
->>>>>>> 1d73a8108bb9adae7bea4743b554f62754d64e48
+ else if (age > 18)  {
+float b ;
+b = 10;
 }
-	
-input_buffer1 = newReadFloatBuffer(height*width, inputMatrix1);
-input_buffer2 = newReadFloatBuffer(height*width, inputMatrix2);
-output_buffer = newWriteFloatBuffer(height*width);
-gupEnqueue2DRangeKernel("kernely", global, local);
-gupFinish();
-readFloatBuffer(output_buffer, width*height, multMatrix)
-;
 
-<<<<<<< HEAD
-clReleaseMemObject(input_buffer1);
-clReleaseMemObject(input_buffer2);
-clReleaseMemObject(output_buffer);
-
-free(inputMatrix1);
-free(inputMatrix2);
-free(multMatrix);
-free(multMatrix2);
-	
-inputMatrix1 = newMatrix(width*height);
-inputMatrix2 = newMatrix(width*height);
-multMatrix = newMatrix(width*height);
-multMatrix2 = newMatrix(width*height);
-
-for(i=0;i<width*height;i++) {
-	inputMatrix1[i] = i / 100.0f;
-	inputMatrix2[i] = i / 100.0f;
-	multMatrix[i] = 0;
-	multMatrix2[i] = 0;
-=======
-for (int z = 0; z < width*height; z++) {
-printf("%f", multMatrix[z]);
->>>>>>> 1d73a8108bb9adae7bea4743b554f62754d64e48
+ else  {
+printf( "you can"t do anything");
 }
-	
-input_buffer1 = newReadFloatBuffer(height*width, inputMatrix1);
-input_buffer2 = newReadFloatBuffer(height*width, inputMatrix2);
-output_buffer = newWriteFloatBuffer(height*width);
-gupEnqueue2DRangeKernel("kernely", global, local);
-gupFinish();
-readFloatBuffer(output_buffer, width*height, multMatrix)
-;
 
-clReleaseMemObject(input_buffer1);
-clReleaseMemObject(input_buffer2);
-clReleaseMemObject(output_buffer);
-
-<<<<<<< HEAD
-=======
-clReleaseMemObject(input_buffer1);
-clReleaseMemObject(input_buffer2);
-clReleaseMemObject(output_buffer);
-
->>>>>>> 1d73a8108bb9adae7bea4743b554f62754d64e48
-free(inputMatrix1);
-free(inputMatrix2);
-free(multMatrix);
-free(multMatrix2);
-<<<<<<< HEAD
-	
-inputMatrix1 = newMatrix(width*height);
-inputMatrix2 = newMatrix(width*height);
-multMatrix = newMatrix(width*height);
-multMatrix2 = newMatrix(width*height);
-
-for(i=0;i<width*height;i++) {
-	inputMatrix1[i] = i / 100.0f;
-	inputMatrix2[i] = i / 100.0f;
-	multMatrix[i] = 0;
-	multMatrix2[i] = 0;
-}
-	
-input_buffer1 = newReadFloatBuffer(height*width, inputMatrix1);
-input_buffer2 = newReadFloatBuffer(height*width, inputMatrix2);
-output_buffer = newWriteFloatBuffer(height*width);
-gupEnqueue2DRangeKernel("kernelz", global, local);
-gupFinish();
-readFloatBuffer(output_buffer, width*height, multMatrix)
-;
-=======
->>>>>>> 1d73a8108bb9adae7bea4743b554f62754d64e48
-gupClean();
- return 0;
 }

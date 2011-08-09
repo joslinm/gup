@@ -1,9 +1,23 @@
-a = "hello world"
-print a
-for x=0 to 100:
-	print 'sup'
-	f = 19 + 5 + 2 + 100
-	print f
+name = "mark"
+age = 22
+school = "wentworth"
 
-for y=0 to 250:
+for y=10 to 20:
 	print y
+	print "\n"
+	
+if age >= 21:
+	x = age
+	print "you are "
+	print x
+	print "\nyou can drink!\n"
+else if age > 18:
+	print "can smoke!\n"
+	c = 10
+else:
+	print "you shall not pass\n"
+	
+if age > 50:
+	print "hey old man"
+else:
+	print "hey young guy"

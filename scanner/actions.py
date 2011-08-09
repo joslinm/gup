@@ -143,9 +143,6 @@ class WhileStatement(node):
 class FunctionDeclaration(node):
 	def __init__(self,t):
 		node.__init__(self,t)
-		print self.t
-		print self.t[2]
-		raw_input()
 		
 		dict = {}
 		dict['branch'] = ''
@@ -184,7 +181,6 @@ class ExpressionStatement(node):
 		self.tokens = t.asList()
 		self.t = t
 		self.check_assignment()
-		
 		
 	#Check for assignment statement & grab name
 	def check_assignment(self):
