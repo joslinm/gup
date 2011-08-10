@@ -45,7 +45,6 @@ class Visitor(object):
 				element[x] = a
 		r = ' '.join(element)
 		self.tokens.append(r)
-		print self.tokens
 	def append(self, trailer):
 		x = self.tokens.pop()
 		x += trailer
@@ -167,13 +166,11 @@ class TranslateVisitor(Visitor):
 	
 	#Visit methods
 	def visit_Root(self, element):
-		print type(element).__name__
 		declarations = ''
 		for y,x in self.symbols.iteritems():
 			if 1 == x['scope']:
 				if not x['declared']:
 					declarations += '%s %s ;\n' % (x['type'], y)
-				print declarations
 		if len(self.kernels) > 0:
 			names = []
 			declarations += 'gupKernelCount = %s;\n' % len(self.kernel_stack)
@@ -250,30 +247,19 @@ free(multMatrix2);
 				self.tokens.append('}')
 				
 	def visit_Statement(self,element):
-		print type(element).__name__
-		print element
-		
+		pass
 	def visit_CompoundStatement(self,element):
-		print type(element).__name__
-		print element
-		
+		pass
 	def visit_SimpleStatement(self,element):
-		print type(element).__name__
-		print element
+		pass
 		
 	def visit_SmallStatement(self,element):
-		print type(element).__name__
-		print element
 		if self.suppr: 
 			self.suppr = False 
 		else: 
 			self.append(';\n')
 		
 	def visit_Suite(self, element):
-		print type(element).__name__
-		print element
-		print self.tokens
-		print self.symbols
 		declarations = ''
 		for y,x in self.symbols.iteritems():
 			if element.hash == x['scope']:
@@ -286,17 +272,9 @@ free(multMatrix2);
 		self.append('}\n\n')
 
 	def visit_IfStatement(self, element):
-		print type(element).__name__
-		print element
-		
 		self.merge(element)
 		
-	def visit_ForStatement(self, element):
-		print type(element).__name__
-		print self.tokens
-		print element
-		print self.tokens
-		
+	def visit_ForStatement(self, element):	
 		suite = self.tokens.pop()
 		max = self.tokens.pop()
 		min = self.tokens.pop()
@@ -316,21 +294,12 @@ free(multMatrix2);
 		pass
 	def visit_ExpressionStatement(self, element):
 		##e.g. COMPARISON '=' COMPARISON 
-		print type(element).__name__
-		print element
-		print self.tokens
-		#
 		length = len(element)
 		if length % 3 == 0:
 			self.name_stack.append(element[0].get_child_str())
 			self.merge(element)
 			
 	def visit_PrintStatement(self, element):
-		print type(element).__name__
-		print element
-		print len(element)
-		print len(element) % 2
-		
 		length = len(element)
 		if length == 1:
 			pass
@@ -366,10 +335,6 @@ printf("%f", multMatrix[z]);
 				self.append(')')
 	
 	def visit_FunctionCall(self, element):
-		print type(element).__name__
-		print element
-		print self.tokens
-
 		import actions
 		func = actions.functions[element[0].get_child_str()]
 		params = []
@@ -415,9 +380,6 @@ readFloatBuffer(output_buffer, width*height, multMatrix)
 			self.tokens.append(func_)
 	
 	def visit_KernelDeclaration(self, element):
-		print type(element).__name__
-		print element
-		print self.tokens
 		#[NAME, STMT]
 		stmt = self.tokens.pop()
 		name = self.tokens.pop()
@@ -435,29 +397,19 @@ readFloatBuffer(output_buffer, width*height, multMatrix)
 		self.kernel_stack.append(name)
 		
 	def visit_FunctionDeclaration(self, element):
-		print type(element).__name__
-		print element
-		print self.tokens
-		
 		if self.functions[self.tokens[0]]['kernel']:
-			print "is kernel"
 			pass
 		else:
-			pass#Compute stuff here
+			pass
 
 	def visit_Test(self, element):
-		print type(element).__name__
-		print element
+		pass
 		
 		
 	def visit_Expression(self, element):
-		print type(element).__name__
-		print element
+		pass
 		
 	def visit_ArithmeticExpression(self, element):
-		print type(element).__name__
-		print element
-		
 		length = len(element)
 		if length == 1:
 			pass
@@ -465,8 +417,6 @@ readFloatBuffer(output_buffer, width*height, multMatrix)
 			self.merge(element)
 	
 	def visit_Power(self, element):
-		print type(element).__name__
-		print element
 		length = len(element)
 		
 		if(length == 2):
@@ -480,9 +430,6 @@ readFloatBuffer(output_buffer, width*height, multMatrix)
 
 			
 	def visit_Comparison(self, element):
-		print type(element).__name__
-		print element
-		print len(element)
 		length = len(element)
 
 		if length == 1:
@@ -495,23 +442,13 @@ readFloatBuffer(output_buffer, width*height, multMatrix)
 	def visit_Atom(self, element):
 		pass
 	def visit_Number(self, element):
-		print type(element).__name__
-		print element
 		self.tokens.append(element[0])
-	def visit_Name(self, element):
-		print type(element).__name__
-		print element
-		print element.type
-		
+	def visit_Name(self, element):	
 		if element[0] == 'output':
 			self.tokens.append('output[globalIdy * widthA + globalIdx]')
-			print self.tokens
 		else:
 			self.tokens.append(element[0])
 	def visit_String(self, element):
-		print type(element).__name__
-		print element
-		
 		self.tokens.append(element[0])
 	
 	

@@ -17,7 +17,7 @@ class Compiler(object):
 			f.write(x)
 
 		if len(pl.kernels) > 0:
-			f = open(self.output_file + '.cl', 'w')
+			f = open('kernels.cl', 'w')
 			for x in pl.kernels:
 				f.write(x)
 			return True

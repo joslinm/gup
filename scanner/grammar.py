@@ -215,7 +215,7 @@ indentst = [1]
 suite = indentedBlock(suite_stmt, indentst).setParseAction(actions.Suite)
 
 if_stmt = (_if + test + COLON + suite + ZeroOrMore(_elif + test + COLON + suite) \
-		+ Optional(_else + COLON) + suite).setParseAction(actions.IfStatement).setDebug().setName("ifstatemment")
+		+ Optional(_else + COLON) + suite).setParseAction(actions.IfStatement)
 for_stmt = (_for + NAME + assign + NUM + Keyword('to').suppress() + NUM + COLON + suite \
 		+ Optional(_else + COLON + suite))('for_stmt').setParseAction(actions.ForStatement)
 while_stmt = (_while + test + COLON + suite + Optional(_else + COLON + suite))('while').setParseAction(actions.WhileStatement)

@@ -20,4 +20,4 @@ else:
 if age > 50:
 	print "hey old man"
 else:
-	print "hey young guy"
+	print "hey young guy\n"

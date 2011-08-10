@@ -136,7 +136,6 @@ class ForStatement(node):
 		node.__init__(self,t)
 		self.symbols[t[1].get_child_str()] = {'type':'int', 'declared':True, 'scope':-1}
 		self.t[1].type = {'type':'int', 'declared':True, 'scope':-1}
-		print self.t[1].type
 
 class WhileStatement(node):
 	pass
@@ -170,7 +169,7 @@ class DecoratedDeclaration(node):
 	pass
 
 ####
-#Small Statement --> 5th level: expr_stmt|print_stmt|del_stmt|pass_stmt|flow_stmt|import_stmt
+#Small Statement --> 5th level: expr_stmtmt|del_stmt|pass_stmt|flow_stmt|import_stmt
 ####
 
 #Expression statement catches assignment statements & operates on the NAME
@@ -195,9 +194,6 @@ class ExpressionStatement(node):
 				self.symbols[name] = {'type':'char*', 'declared':False, 'scope':0, 'value': self.t[2].get_child_str()}
 			elif wand('Name')[0] in self.symbols:
 				dict = self.symbols[wand('Name')[0]].copy()
-				print dict
-				print name
-				print self.symbols
 				if name in self.symbols:
 					return
 				else:
